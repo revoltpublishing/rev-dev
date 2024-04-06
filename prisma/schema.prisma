@@ -1,0 +1,60 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String      @id @default(uuid())
+  firstName   String   
+  lastName    String
+  email       String   @unique()
+  mobile      String  @unique()
+  mobileRegion  String 
+  isActive      Boolean @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  Image       Image[]
+  UserImageMap  UserImageMap[]
+}
+
+model Image {
+  id                  String                   @id @default(uuid())
+  name                String
+  s3Path              String
+  slug                String                @unique
+  uploadedByUserId    String
+  isActive            Int                   @default(1)
+  uploaded            Int                   @default(0)
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @default(now())
+  User                User                  @relation(fields: [uploadedByUserId], references: [id])
+  
+  UserImageMap  UserImageMap[]
+
+  @@index([uploadedByUserId], name: "FK_IMAGE_UPLOADED_BY_USER_ID_idx")
+  @@index([createdAt])
+}
+
+model UserImageMap {
+  id        Int   @id @default(autoincrement())
+  userId    String
+  imageId   String
+  isActive  String
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @default(now())
+
+  User                User                  @relation(fields: [userId], references: [id])
+  Image                Image                  @relation(fields: [imageId], references: [id])
+
+}
