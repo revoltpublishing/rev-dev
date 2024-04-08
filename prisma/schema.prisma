@@ -26,6 +26,7 @@ model User {
 
   Image       Image[]
   UserImageMap  UserImageMap[]
+  BookUserMap     BookUserMap[]
 }
 
 model Image {
@@ -41,6 +42,8 @@ model Image {
   User                User                  @relation(fields: [uploadedByUserId], references: [id])
   
   UserImageMap  UserImageMap[]
+  BookStageImageMap   BookStageImageMap[]
+
 
   @@index([uploadedByUserId], name: "FK_IMAGE_UPLOADED_BY_USER_ID_idx")
   @@index([createdAt])
@@ -57,4 +60,60 @@ model UserImageMap {
   User                User                  @relation(fields: [userId], references: [id])
   Image                Image                  @relation(fields: [imageId], references: [id])
 
+}
+
+model Book {
+  id                  String                   @id @default(uuid())
+  title               String
+  description         String
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @default(now())
+
+
+  // *********************************  draft details to be added  ****************************
+
+  BookStage           BookStage[]
+  BookUserMap     BookUserMap[]
+}
+
+model BookUserMap {
+  id      Int           @id @default(autoincrement())
+  bookId  String
+  userId  String
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @default(now())
+
+  User      User     @relation(fields: [userId], references: [id])
+  Book         Book       @relation(fields: [bookId], references: [id])
+
+}
+
+model BookStage {
+  id      String           @id @default(uuid())
+  bookId  String
+  stage   Int
+  isAccepted  Boolean   @default(false)
+  isActive  Boolean   @default(false)
+  isWorking    Boolean   @default(false)
+  isCompleted  Boolean   @default(false)
+  isSubmitted  Boolean   @default(false)
+  requirement        String     
+
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @default(now())
+
+  Book         Book       @relation(fields: [bookId], references: [id])
+  BookStageImageMap   BookStageImageMap[]
+}
+
+
+model BookStageImageMap {
+  id      Int           @id @default(autoincrement())
+  bookStageId  String
+  imageId     String
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @default(now())
+
+  Image                Image                  @relation(fields: [imageId], references: [id])
+  BookStage         BookStage                  @relation(fields: [bookStageId], references: [id])
 }
