@@ -27,6 +27,9 @@ model User {
   Image       Image[]
   UserImageMap  UserImageMap[]
   BookUserMap     BookUserMap[]
+  UserRoleMap   UserRoleMap[]
+
+  @@index([email])
 }
 
 model Image {
@@ -86,6 +89,8 @@ model BookUserMap {
   User      User     @relation(fields: [userId], references: [id])
   Book         Book       @relation(fields: [bookId], references: [id])
 
+  @@index([userId], name : "FK_BOOK_USER_ID_idx")
+
 }
 
 model BookStage {
@@ -104,6 +109,8 @@ model BookStage {
 
   Book         Book       @relation(fields: [bookId], references: [id])
   BookStageImageMap   BookStageImageMap[]
+  @@index([bookId], name : "FK_BOOK_ID_STAGE_idx")
+
 }
 
 
@@ -116,4 +123,89 @@ model BookStageImageMap {
 
   Image                Image                  @relation(fields: [imageId], references: [id])
   BookStage         BookStage                  @relation(fields: [bookStageId], references: [id])
+}
+
+
+// *****************************  ACL TABLES STARTED ****************************************
+
+model Role {
+  id      String      @id @default(uuid())
+  role    Int
+  createdAt            DateTime         @default(now())
+  updatedAt            DateTime         @default(now())
+
+  UserRoleMap   UserRoleMap[]
+  ResourcePermission  ResourcePermission[]
+  ResourceAttributePermission   ResourceAttributePermission[]
+
+}
+
+model Resource {
+  id      Int         @id @default(autoincrement())
+  name    String      @unique()
+  des     String?
+  createdAt            DateTime         @default(now())
+  updatedAt            DateTime         @default(now())
+
+  ResourceAttribute   ResourceAttribute[]
+  ResourcePermission  ResourcePermission[]
+}
+
+model ResourceAttribute {
+  id      Int         @id @default(autoincrement())
+  name    String
+  value   String
+  resourceId   Int
+  createdAt            DateTime         @default(now())
+  updatedAt            DateTime         @default(now())
+
+  ResourceAttributePermission   ResourceAttributePermission[]
+
+  Resource Resource @relation(fields: [resourceId], references: [id])
+  @@index([resourceId], name: "FK_RA_RESOURCE_ID_idx")
+}
+
+model ResourcePermission {
+  id      Int         @id @default(autoincrement())
+  roleId  String        
+  resourceId  Int
+  action      Int
+  createdAt            DateTime         @default(now())
+  updatedAt            DateTime         @default(now())
+
+  Resource Resource @relation(fields: [resourceId], references: [id])
+  Role Role @relation(fields: [roleId], references: [id])
+
+  @@index([resourceId], name: "FK_RP_RESOURCE_ID_idx")
+}
+
+model ResourceAttributePermission {
+  id      Int         @id @default(autoincrement())
+  roleId    String
+  resourceAttributeId  Int
+  action      Int
+  createdAt            DateTime         @default(now())
+  updatedAt            DateTime         @default(now())
+
+  Role Role @relation(fields: [roleId], references: [id])
+  ResourceAttribute   ResourceAttribute @relation(fields: [resourceAttributeId], references: [id])
+
+  @@index([resourceAttributeId], name : "FK_RAP_RESOURCE_ATTRIBUTE_ID_idx")
+}
+
+
+model UserRoleMap {
+  id      Int       @id @default(autoincrement())
+  userId         String
+  roleId         String
+  createdAt      DateTime       @default(now())
+
+
+  Role Role @relation(fields: [roleId], references: [id])
+  User           User           @relation(fields: [userId], references: [id])
+
+
+  @@unique([userId, roleId], name: "UNIQUE_USER_ROLE_ID")
+  @@index([roleId], name: "FK_ROLE_MAP_ROLE_ID_idx")
+  @@index([userId], name: "FK_ROLE_MAP_USER_ID_idx")
 }
