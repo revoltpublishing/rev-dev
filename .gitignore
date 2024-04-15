@@ -36,7 +36,7 @@ yarn-error.log
 /quick-start
 /example_dist
 /example
-
+/dist
 # tests
 /test
 /benchmarks/memory

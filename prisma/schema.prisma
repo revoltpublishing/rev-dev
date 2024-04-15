@@ -19,7 +19,9 @@ model User {
   lastName    String
   email       String   @unique()
   mobile      String  @unique()
+  password    String
   mobileRegion  String 
+  accessToken   String  @default(uuid()) @unique()
   isActive      Boolean @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -30,6 +32,7 @@ model User {
   UserRoleMap   UserRoleMap[]
 
   @@index([email])
+  @@index([accessToken])
 }
 
 model Image {
@@ -129,15 +132,13 @@ model BookStageImageMap {
 // *****************************  ACL TABLES STARTED ****************************************
 
 model Role {
-  id      String      @id @default(uuid())
-  role    Int
+  role                 Int              @id
   createdAt            DateTime         @default(now())
   updatedAt            DateTime         @default(now())
 
   UserRoleMap   UserRoleMap[]
   ResourcePermission  ResourcePermission[]
   ResourceAttributePermission   ResourceAttributePermission[]
-
 }
 
 model Resource {
@@ -167,27 +168,27 @@ model ResourceAttribute {
 
 model ResourcePermission {
   id      Int         @id @default(autoincrement())
-  roleId  String        
+  roleId  Int        
   resourceId  Int
   action      Int
   createdAt            DateTime         @default(now())
   updatedAt            DateTime         @default(now())
 
   Resource Resource @relation(fields: [resourceId], references: [id])
-  Role Role @relation(fields: [roleId], references: [id])
+  Role Role @relation(fields: [roleId], references: [role])
 
   @@index([resourceId], name: "FK_RP_RESOURCE_ID_idx")
 }
 
 model ResourceAttributePermission {
   id      Int         @id @default(autoincrement())
-  roleId    String
+  roleId    Int
   resourceAttributeId  Int
   action      Int
   createdAt            DateTime         @default(now())
   updatedAt            DateTime         @default(now())
 
-  Role Role @relation(fields: [roleId], references: [id])
+  Role Role @relation(fields: [roleId], references: [role])
   ResourceAttribute   ResourceAttribute @relation(fields: [resourceAttributeId], references: [id])
 
   @@index([resourceAttributeId], name : "FK_RAP_RESOURCE_ATTRIBUTE_ID_idx")
@@ -197,11 +198,11 @@ model ResourceAttributePermission {
 model UserRoleMap {
   id      Int       @id @default(autoincrement())
   userId         String
-  roleId         String
+  roleId         Int
   createdAt      DateTime       @default(now())
 
 
-  Role Role @relation(fields: [roleId], references: [id])
+  Role Role @relation(fields: [roleId], references: [role])
   User           User           @relation(fields: [userId], references: [id])
 
 
