@@ -29,7 +29,7 @@ model User {
   Image       Image[]
   UserImageMap  UserImageMap[]
   BookUserMap     BookUserMap[]
-  UserRoleMap   UserRoleMap[]
+  UserRoleMap   UserRoleMap?
 
   @@index([email])
   @@index([accessToken])
@@ -164,9 +164,9 @@ model ResourceAttribute {
 
   Resource Resource @relation(fields: [resourceId], references: [id])
   @@index([resourceId], name: "FK_RA_RESOURCE_ID_idx")
+  @@unique([name, value])
 }
-
-model ResourcePermission {
+ model ResourcePermission {
   id      Int         @id @default(autoincrement())
   roleId  Int        
   resourceId  Int
@@ -197,7 +197,7 @@ model ResourceAttributePermission {
 
 model UserRoleMap {
   id      Int       @id @default(autoincrement())
-  userId         String
+  userId         String   @unique
   roleId         Int
   createdAt      DateTime       @default(now())
 
