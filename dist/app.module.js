@@ -10,6 +10,12 @@ exports.AppModule = void 0;
 const common_1 = require("@nestjs/common");
 const users_module_1 = require("./modules/user/users.module");
 const project_module_1 = require("./modules/project/project.module");
+const config_1 = require("@nestjs/config");
+const book_module_1 = require("./modules/book/book.module");
+const AppEnvironmentModule = config_1.ConfigModule.forRoot({
+    envFilePath: "./.env",
+    isGlobal: true,
+});
 let AppModule = class AppModule {
     configure(consumer) {
         consumer;
@@ -18,9 +24,10 @@ let AppModule = class AppModule {
 exports.AppModule = AppModule;
 exports.AppModule = AppModule = __decorate([
     (0, common_1.Module)({
-        imports: [users_module_1.UsersModule, project_module_1.ProjectModule],
+        imports: [users_module_1.UsersModule, project_module_1.ProjectModule, book_module_1.BookModule, AppEnvironmentModule],
         controllers: [],
         providers: [],
+        exports: [],
     })
 ], AppModule);
 //# sourceMappingURL=app.module.js.map

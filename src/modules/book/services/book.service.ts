@@ -1,11 +1,10 @@
 import { Injectable } from "@nestjs/common";
 import { DbClient } from "src/common/services/dbclient.service";
-import { BookI } from "../interfaces/book.interface";
+import { BookI, uploadBookDraftI } from "../interfaces/book.interface";
 
 @Injectable()
 export class BookService {
   constructor(private readonly dbClient: DbClient) {}
-
   async createBook(body: BookI) {
     return this.dbClient.book.create({
       data: {
