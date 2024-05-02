@@ -1,6 +1,9 @@
-import { Injectable } from "@nestjs/common";
+import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { UserI } from "../interfaces/user.interface";
 import { DbClient } from "src/common/services/dbclient.service";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
+import { DbStatusCodes } from "src/common/constants/status";
+import { prismaErrorMapper } from "src/common/mappers/prisma";
 
 export const userIncludeObject = {
   UserRoleMap: {
@@ -19,24 +22,33 @@ export const userIncludeObject = {
     },
   },
 };
-
 @Injectable()
 export class UsersService {
   constructor(private readonly dbClient: DbClient) {}
-  async createUser(params: UserI) {
-    return this.dbClient.user.create({
+  async createUser(body: UserI) {
+    const { roleId, ...rest } = body;
+    try {
+      return await this.dbClient.user.create({
+        data: {
+          ...rest,
+          UserRoleMap: {
+            create: {
+              roleId,
+            },
+          },
+        },
+      });
+    } catch (e) {
+      return prismaErrorMapper(e);
+    }
+  }
+  async updateUser(body: UserI) {
+    return await this.dbClient.user.update({
       data: {
-        ...params,
-        UserRoleMap: {
-          create: {
-            roleId: params.role,
-          },
-        },
-        BookUserMap: {
-          create: {
-            bookId: params.bookId,
-          },
-        },
+        ...body,
+      },
+      where: {
+        email: body.email,
       },
     });
   }

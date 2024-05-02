@@ -15,19 +15,19 @@ import { BasicAuthMiddleware } from "./common/middlewares/userinfo.middleware";
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer
-      .apply(BasicAuthMiddleware)
-      .exclude(
-        { path: "/api/access-control/ping", method: RequestMethod.ALL },
-        { path: "/api/access-control/resource", method: RequestMethod.ALL },
-        {
-          path: "/api/access-control/resource/attribute",
-          method: RequestMethod.ALL,
-        }
-      )
-      .forRoutes({
-        path: "*",
-        method: RequestMethod.ALL,
-      });
+    consumer;
+    // .apply(BasicAuthMiddleware)
+    // .exclude(
+    //   { path: "/api/access-control/ping", method: RequestMethod.ALL },
+    //   { path: "/api/access-control/resource", method: RequestMethod.ALL },
+    //   {
+    //     path: "/api/access-control/resource/attribute",
+    //     method: RequestMethod.ALL,
+    //   }
+    // )
+    // .forRoutes({
+    //   path: "*",
+    //   method: RequestMethod.ALL,
+    // });
   }
 }

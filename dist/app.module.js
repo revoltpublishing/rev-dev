@@ -10,19 +10,9 @@ exports.AppModule = void 0;
 const common_1 = require("@nestjs/common");
 const users_module_1 = require("./modules/user/users.module");
 const project_module_1 = require("./modules/project/project.module");
-const userinfo_middleware_1 = require("./common/middlewares/userinfo.middleware");
 let AppModule = class AppModule {
     configure(consumer) {
-        consumer
-            .apply(userinfo_middleware_1.BasicAuthMiddleware)
-            .exclude({ path: "/api/access-control/ping", method: common_1.RequestMethod.ALL }, { path: "/api/access-control/resource", method: common_1.RequestMethod.ALL }, {
-            path: "/api/access-control/resource/attribute",
-            method: common_1.RequestMethod.ALL,
-        })
-            .forRoutes({
-            path: "*",
-            method: common_1.RequestMethod.ALL,
-        });
+        consumer;
     }
 };
 exports.AppModule = AppModule;

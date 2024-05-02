@@ -22,3 +22,17 @@ export class StatusCodes {
     HttpStatus.NOT_ACCEPTABLE
   );
 }
+export class DbStatusCodes {
+  public static readonly EMAIL_ALREADY_OCCUPIED = new HttpException(
+    "email",
+    HttpStatus.NOT_ACCEPTABLE
+  );
+  public static readonly MOBILE_ALREADY_OCCUPIED = new HttpException(
+    "mobile",
+    HttpStatus.NOT_ACCEPTABLE
+  );
+  public static readonly ERROR_IN_SAVING_DETAILS = new HttpException(
+    "error in saving details",
+    HttpStatus.BAD_REQUEST
+  );
+}

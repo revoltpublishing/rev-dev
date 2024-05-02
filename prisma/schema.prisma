@@ -31,7 +31,7 @@ model User {
   BookUserMap     BookUserMap[]
   UserRoleMap   UserRoleMap?
 
-  @@index([email])
+  @@index([createdAt])
   @@index([accessToken])
 }
 
@@ -39,7 +39,7 @@ model Image {
   id                  String                   @id @default(uuid())
   name                String
   s3Path              String
-  slug                String                @unique
+  mimeType            String
   uploadedByUserId    String
   isActive            Int                   @default(1)
   uploaded            Int                   @default(0)
@@ -49,7 +49,7 @@ model Image {
   
   UserImageMap  UserImageMap[]
   BookStageImageMap   BookStageImageMap[]
-
+  Book                Book?
 
   @@index([uploadedByUserId], name: "FK_IMAGE_UPLOADED_BY_USER_ID_idx")
   @@index([createdAt])
@@ -59,7 +59,7 @@ model UserImageMap {
   id        Int   @id @default(autoincrement())
   userId    String
   imageId   String
-  isActive  String
+  isActive  Int       
   createdAt           DateTime              @default(now())
   updatedAt           DateTime              @default(now())
 
@@ -72,6 +72,7 @@ model Book {
   id                  String                   @id @default(uuid())
   title               String
   description         String
+  draftId             String                @unique()
   createdAt           DateTime              @default(now())
   updatedAt           DateTime              @default(now())
 
@@ -80,6 +81,8 @@ model Book {
 
   BookStage           BookStage[]
   BookUserMap     BookUserMap[]
+  Image                Image                  @relation(fields: [draftId], references: [id])
+
 }
 
 model BookUserMap {
