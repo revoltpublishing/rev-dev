@@ -3,7 +3,7 @@ import { ImageService } from "../services/image.service";
 import { Body, Controller, Get, Param, Post } from "@nestjs/common";
 import { S3Service } from "src/common/services/s3.service";
 
-@Controller("image")
+@Controller("images")
 export class ImageController {
   constructor(
     private readonly imageService: ImageService,
@@ -14,17 +14,17 @@ export class ImageController {
     @Body()
     body: uploadBookDraftI
   ) {
-    const { name, mimeType, uploadedByUserId } = body;
-    const s3Path = `drafts/${name}`;
+    const { title, mimeType, uploadedBy } = body;
+    const s3Path = `drafts/${title}`;
     const signedURL = await this.s3Service.getPresignedURL({
       path: s3Path,
       mimeType,
     });
     const doc = await this.imageService.addBookDraftImage({
-      name,
+      title,
       s3Path,
       mimeType,
-      uploadedByUserId,
+      uploadedBy,
     });
     return { signedURL, id: doc.id };
   }

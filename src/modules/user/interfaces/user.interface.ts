@@ -19,3 +19,10 @@ export interface createUserI {
   roleId: number;
   bookId?: string;
 }
+export interface filterUserI {
+  search: string;
+  role: string;
+  roleId: number;
+  offset: number;
+  pg: number;
+}

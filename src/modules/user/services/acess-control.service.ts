@@ -8,10 +8,10 @@ import { DbClient } from "src/common/services/dbclient.service";
 @Injectable()
 export class AcessControlService {
   constructor(private readonly dbClient: DbClient) {}
-  createRole(params: { role: number }) {
-    return this.dbClient.role.create({
+  createRole(params: { role: string; id: number }) {
+    return this.dbClient.roleMaster.create({
       data: {
-        role: params.role,
+        ...params,
       },
     });
   }
@@ -104,6 +104,13 @@ export class AcessControlService {
           },
         },
         ResourceAttributePermission: {},
+      },
+    });
+  }
+  getRoleByRole(params: { role: string }) {
+    return this.dbClient.roleMaster.findFirst({
+      where: {
+        ...params,
       },
     });
   }

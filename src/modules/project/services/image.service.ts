@@ -8,10 +8,10 @@ export class ImageService {
   async addBookDraftImage(body: uploadBookDraftI) {
     return this.dbClient.image.create({
       data: {
-        name: body.name,
+        name: body.title,
         s3Path: body.s3Path,
         mimeType: body.mimeType,
-        uploadedByUserId: body.uploadedByUserId,
+        uploadedByUserId: body.uploadedBy,
       },
     });
   }

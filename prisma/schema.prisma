@@ -96,6 +96,7 @@ model BookUserMap {
   Book         Book       @relation(fields: [bookId], references: [id])
 
   @@index([userId], name : "FK_BOOK_USER_ID_idx")
+  @@unique([bookId,userId])
 
 }
 
@@ -134,14 +135,16 @@ model BookStageImageMap {
 
 // *****************************  ACL TABLES STARTED ****************************************
 
-model Role {
-  role                 Int              @id
+model RoleMaster {
+  id                   Int              @id
+  role                 String           @unique
   createdAt            DateTime         @default(now())
   updatedAt            DateTime         @default(now())
 
   UserRoleMap   UserRoleMap[]
   ResourcePermission  ResourcePermission[]
   ResourceAttributePermission   ResourceAttributePermission[]
+
 }
 
 model Resource {
@@ -178,7 +181,7 @@ model ResourceAttribute {
   updatedAt            DateTime         @default(now())
 
   Resource Resource @relation(fields: [resourceId], references: [id])
-  Role Role @relation(fields: [roleId], references: [role])
+  Role RoleMaster @relation(fields: [roleId], references: [id])
 
   @@index([resourceId], name: "FK_RP_RESOURCE_ID_idx")
 }
@@ -191,7 +194,7 @@ model ResourceAttributePermission {
   createdAt            DateTime         @default(now())
   updatedAt            DateTime         @default(now())
 
-  Role Role @relation(fields: [roleId], references: [role])
+  Role RoleMaster @relation(fields: [roleId], references: [id])
   ResourceAttribute   ResourceAttribute @relation(fields: [resourceAttributeId], references: [id])
 
   @@index([resourceAttributeId], name : "FK_RAP_RESOURCE_ATTRIBUTE_ID_idx")
@@ -205,7 +208,7 @@ model UserRoleMap {
   createdAt      DateTime       @default(now())
 
 
-  Role Role @relation(fields: [roleId], references: [role])
+  Role RoleMaster @relation(fields: [roleId], references: [id])
   User           User           @relation(fields: [userId], references: [id])
 
 
