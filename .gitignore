@@ -31,12 +31,12 @@ yarn-error.log
 /packages/**/.npmignore
 /packages/**/LICENSE
 *.tsbuildinfo
-
+dist
 # example
 /quick-start
 /example_dist
 /example
-
+/dist
 # tests
 /test
 /benchmarks/memory
