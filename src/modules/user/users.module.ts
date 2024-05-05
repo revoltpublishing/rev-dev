@@ -6,6 +6,8 @@ import { AccessControlController } from "./controllers/access-control.controller
 import { UserController } from "./controllers/users.controller";
 import { UsersService } from "./services/users.service";
 import { BookService } from "../book/services/book.service";
+import { ImageService } from "../project/services/image.service";
+import { S3Service } from "src/common/services/s3.service";
 
 @Module({
   controllers: [AccessControlController, UserController],
@@ -15,6 +17,8 @@ import { BookService } from "../book/services/book.service";
     UsersService,
     DbClient,
     BookService,
+    ImageService,
+    S3Service,
   ],
   imports: [],
   exports: [AuthService, AcessControlService],

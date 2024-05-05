@@ -10,7 +10,7 @@ interface signedURLParams {
 
 @Injectable()
 export class S3Service {
-  s3 = undefined;
+  s3: S3 = undefined;
   constructor(private readonly configService: ConfigService) {
     this.s3 = new S3({
       region: this.configService.get("AWS_S3_REGION"),
@@ -21,7 +21,7 @@ export class S3Service {
       signatureVersion: "v4",
     });
   }
-  async getPresignedURL(params: signedURLParams) {
+  async getPresignedURLForUpload(params: signedURLParams) {
     const {
       path,
       mimeType,
@@ -34,9 +34,23 @@ export class S3Service {
       Expires: 24 * 3600,
       ContentType: mimeType,
     });
-
     return signedUrl;
   }
+  async getPresignedURL(params: signedURLParams) {
+    const {
+      path,
+      mimeType,
+      bucket = this.configService.get("AWS_S3_BUCKET_NAME"),
+    } = params;
+    const signedUrl: string = await this.s3.getSignedUrlPromise("getObject", {
+      Bucket: bucket,
+      Key: path,
+      Expires: 24 * 3600,
+      ResponseContentType: mimeType,
+    });
+    return signedUrl;
+  }
+
   async uploadBlobToS3(
     s3Path: string,
     blob: ArrayBuffer,

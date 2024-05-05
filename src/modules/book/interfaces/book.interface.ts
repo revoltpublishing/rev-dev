@@ -7,11 +7,16 @@ export interface BookI {
   draftId: string;
 }
 
-export interface uploadBookDraftI {
+export interface uploadImageI {
+  id?: string;
   title: string;
   uploadedBy: string;
   s3Path: string;
   mimeType: string;
+}
+
+export interface userUploadImageI extends uploadImageI {
+  userId: string;
 }
 
 export interface filterBookI {

@@ -31,7 +31,7 @@ export class BasicAuthMiddleware implements NestMiddleware {
     // check resource
     const rescInfo = await this.accessControlService.getResourceInfo({
       resc,
-      roleId: userDetails.UserRoleMap.Role.id,
+      roleId: userDetails.UserRoleMap.roleId,
       action: action.value,
     });
     if (rescInfo.ResourcePermission.length === 0) {

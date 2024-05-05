@@ -7,6 +7,7 @@ export interface UserI {
   mobileRegion: string;
   roleId: number;
   bookId?: string;
+  s3Url?: string;
 }
 
 export interface createUserI {

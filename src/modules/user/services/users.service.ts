@@ -4,7 +4,8 @@ import { DbClient } from "src/common/services/dbclient.service";
 import { prismaErrorMapper } from "src/common/mappers/prisma";
 import { Prisma } from "@prisma/client";
 
-export const userIncludeObject = {
+export const userIncludeObject: Prisma.UserInclude = {
+  ProfileImage: true,
   UserRoleMap: {
     include: {
       Role: {},

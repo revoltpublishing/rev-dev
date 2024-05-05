@@ -22,15 +22,16 @@ model User {
   password    String
   mobileRegion  String 
   accessToken   String  @default(uuid()) @unique()
+  profileImageId  String?  @unique()      
   isActive      Boolean @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  Image       Image[]
-  UserImageMap  UserImageMap[]
+  Image           Image[]       @relation(name:"FK_USER_IMAGE_ID")
+  UserImageMap    UserImageMap[]
   BookUserMap     BookUserMap[]
-  UserRoleMap   UserRoleMap?
-
+  UserRoleMap     UserRoleMap?
+  ProfileImage    Image?       @relation(name: "FK_PROFILE_IMAGE_ID",fields: [profileImageId],references: [id])
   @@index([createdAt])
   @@index([accessToken])
 }
@@ -45,12 +46,12 @@ model Image {
   uploaded            Int                   @default(0)
   createdAt           DateTime              @default(now())
   updatedAt           DateTime              @default(now())
-  User                User                  @relation(fields: [uploadedByUserId], references: [id])
+  User                User                  @relation(name: "FK_USER_IMAGE_ID",fields: [uploadedByUserId], references: [id])
   
-  UserImageMap  UserImageMap[]
+  UserImageMap        UserImageMap[]
   BookStageImageMap   BookStageImageMap[]
   Book                Book?
-
+  UserImage           User?                  @relation(name: "FK_PROFILE_IMAGE_ID")            
   @@index([uploadedByUserId], name: "FK_IMAGE_UPLOADED_BY_USER_ID_idx")
   @@index([createdAt])
 }
