@@ -7,7 +7,7 @@ import {
   UsePipes,
 } from "@nestjs/common";
 import { LoggedInGuard } from "src/common/guards/loggedin.guard";
-import { createUserI, filterUserI, UserI } from "../interfaces/user.interface";
+import { createUserI, filterUserI } from "../interfaces/user.interface";
 import { UsersService } from "../services/users.service";
 import { PayloadValidationPipe } from "src/common/pipes/payload.pipe";
 import { createUserReqSchema } from "../validationSchema/user";
@@ -18,7 +18,7 @@ import { AcessControlService } from "../services/acess-control.service";
 import { ImageService } from "src/modules/project/services/image.service";
 import { S3Service } from "src/common/services/s3.service";
 
-@Controller("users")
+@Controller("user")
 export class UserController {
   constructor(
     private readonly userService: UsersService,
@@ -62,22 +62,24 @@ export class UserController {
     try {
       const list = await this.userService.getUsers({ ...body });
       const count = await this.userService.getUsersCount({ ...body });
-      // const listRes = list.map(async (usr) => {
-      //   if (usr.profileImageId === null) return usr;
-      //   const img = await this.imageService.getImageById({
-      //     id: usr.profileImageId,
-      //   });
-      //   const user = { ...usr, signedURL: "" };
-      //   const s3Path = img.s3Path;
-      //   const mimeType = img.mimeType;
-      //   const signedURL = await this.s3Service.getPresignedURL({
-      //     path: s3Path,
-      //     mimeType,
-      //   });
-      //   user.signedURL = signedURL;
-      //   return user;
-      // });
-      return { count, list };
+      const listRes = await Promise.all(
+        list.map(async (usr) => {
+          if (usr.profileImageId === null) return usr;
+          const img = await this.imageService.getImageById({
+            id: usr.profileImageId,
+          });
+          const user = { ...usr, signedURL: "" };
+          const s3Path = img.s3Path;
+          const mimeType = img.mimeType;
+          const signedURL = await this.s3Service.getPresignedURL({
+            path: s3Path,
+            mimeType,
+          });
+          const temp = { ...user, signedURL: signedURL };
+          return temp;
+        })
+      );
+      return { count, list: listRes };
     } catch (e) {
       throw new MessageError(e);
     }

@@ -1,9 +1,8 @@
 import { Body, Controller, Post } from "@nestjs/common";
 import { BookService } from "../services/book.service";
 import { BookI, filterBookI } from "../interfaces/book.interface";
-import { MessageError } from "src/common/constants/status";
 
-@Controller("books")
+@Controller("book")
 export class BookController {
   constructor(private readonly bookService: BookService) {}
   @Post("/add")

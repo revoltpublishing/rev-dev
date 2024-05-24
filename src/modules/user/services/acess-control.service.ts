@@ -66,6 +66,7 @@ export class AcessControlService {
     resc: string;
     roleId: number;
     action: number;
+    attribute: { name: string; value: string };
   }) {
     return this.dbClient.resource.findFirst({
       where: { name: params.resc },
@@ -77,6 +78,10 @@ export class AcessControlService {
           },
         },
         ResourceAttribute: {
+          where: {
+            name: params.attribute.name,
+            value: params.attribute.value,
+          },
           include: {
             ResourceAttributePermission: {
               where: {

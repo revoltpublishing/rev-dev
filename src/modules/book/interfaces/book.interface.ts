@@ -15,10 +15,6 @@ export interface uploadImageI {
   mimeType: string;
 }
 
-export interface userUploadImageI extends uploadImageI {
-  userId: string;
-}
-
 export interface filterBookI {
   search: string;
   stageId: number;

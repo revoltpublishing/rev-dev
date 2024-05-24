@@ -15,9 +15,12 @@ export class BasicAuthMiddleware implements NestMiddleware {
     const userDetails = await this.authService.getUserInfoByAccessToken({
       token: accessToken,
     });
-    const resc = req.headers["resource"];
-    const act = req.headers["action"] || req.method;
-    const atb = req.headers["atb"] || null;
+    const resc: string = req.headers["resource"];
+    const act: string = req.headers["action"] || req.method;
+    const atb: {
+      name: string;
+      value: string;
+    } = req.headers["atb"] || null;
     if (!userDetails) {
       throw StatusCodes.INVALID_ACCESS_TOKEN;
     }
@@ -33,6 +36,7 @@ export class BasicAuthMiddleware implements NestMiddleware {
       resc,
       roleId: userDetails.UserRoleMap.roleId,
       action: action.value,
+      attribute: atb,
     });
     if (rescInfo.ResourcePermission.length === 0) {
       throw StatusCodes.ACCESS_NOT_ALLOWED;
