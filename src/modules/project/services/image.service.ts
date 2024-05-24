@@ -29,7 +29,9 @@ export class ImageService {
   async getUserProfileImage(params: { id: string }) {
     return this.dbClient.user.findFirst({
       where: { id: params.id },
-      include: { ProfileImage: true },
+      include: {
+        ProfileImage: true,
+      },
     });
   }
   async updateUserProfileImage(params: { imgId: string; userId: string }) {

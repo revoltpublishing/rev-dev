@@ -8,7 +8,6 @@ import { UsersModule } from "./modules/user/users.module";
 import { ProjectModule } from "./modules/project/project.module";
 import { BasicAuthMiddleware } from "./common/middlewares/userinfo.middleware";
 import { ConfigModule } from "@nestjs/config";
-import { S3Service } from "./common/services/s3.service";
 import { BookModule } from "./modules/book/book.module";
 
 const AppEnvironmentModule = ConfigModule.forRoot({
