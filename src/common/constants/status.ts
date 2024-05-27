@@ -35,4 +35,8 @@ export class DbStatusCodes {
     "error in saving details",
     HttpStatus.BAD_REQUEST
   );
+  public static readonly ROLE_DOESNOT_EXISTS = new HttpException(
+    "role doesn't exists",
+    HttpStatus.NOT_FOUND
+  );
 }

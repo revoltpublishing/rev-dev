@@ -1,10 +1,10 @@
 import { CanActivate, ExecutionContext, Injectable } from "@nestjs/common";
 import { Observable } from "rxjs";
-import { AcessControlService } from "src/modules/user/services/acess-control.service";
+import { AcessControlRepository } from "src/modules/user/repositories/acess-control.repository";
 
 @Injectable()
 export class LoggedInGuard implements CanActivate {
-  constructor(private readonly accessControlService: AcessControlService) {}
+  constructor(private readonly accessControlRepo: AcessControlRepository) {}
   canActivate(
     context: ExecutionContext
   ): boolean | Promise<boolean> | Observable<boolean> {

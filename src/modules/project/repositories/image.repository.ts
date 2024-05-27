@@ -3,7 +3,7 @@ import { DbClient } from "src/common/services/dbclient.service";
 import { uploadImageI } from "src/modules/book/interfaces/book.interface";
 
 @Injectable()
-export class ImageService {
+export class ImagesRepository {
   constructor(private readonly dbClient: DbClient) {}
   async addImage(params: uploadImageI) {
     return this.dbClient.image.create({

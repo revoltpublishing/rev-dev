@@ -1,4 +1,5 @@
 import { Injectable } from "@nestjs/common";
+import { DbStatusCodes } from "src/common/constants/status";
 import {
   createResourceParamsI,
   resourceAttributeI,
@@ -6,7 +7,7 @@ import {
 import { DbClient } from "src/common/services/dbclient.service";
 
 @Injectable()
-export class AcessControlService {
+export class AcessControlRepository {
   constructor(private readonly dbClient: DbClient) {}
   createRole(params: { role: string; id: number }) {
     return this.dbClient.roleMaster.create({
@@ -113,10 +114,14 @@ export class AcessControlService {
     });
   }
   getRoleByRole(params: { role: string }) {
-    return this.dbClient.roleMaster.findFirst({
-      where: {
-        ...params,
-      },
-    });
+    try {
+      return this.dbClient.roleMaster.findFirst({
+        where: {
+          ...params,
+        },
+      });
+    } catch (e) {
+      throw DbStatusCodes.ROLE_DOESNOT_EXISTS;
+    }
   }
 }

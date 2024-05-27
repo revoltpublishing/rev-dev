@@ -1,14 +1,14 @@
 import { Injectable, NestMiddleware } from "@nestjs/common";
-import { AuthService } from "src/modules/user/services/auth.service";
+import { AuthService } from "src/modules/user/repositories/auth.repository";
 import { StatusCodes } from "../constants/status";
 import { ACTION_TYPES } from "../constants/action";
-import { AcessControlService } from "src/modules/user/services/acess-control.service";
+import { AcessControlRepository } from "src/modules/user/repositories/acess-control.repository";
 
 @Injectable()
 export class BasicAuthMiddleware implements NestMiddleware {
   constructor(
     private readonly authService: AuthService,
-    private readonly accessControlService: AcessControlService
+    private readonly accessControlRepo: AcessControlRepository
   ) {}
   async use(req: Request, res: Response, next: () => void) {
     const accessToken: string = req.headers["authorization"] as string;
@@ -32,7 +32,7 @@ export class BasicAuthMiddleware implements NestMiddleware {
       throw StatusCodes.INVAID_GENERAL;
     }
     // check resource
-    const rescInfo = await this.accessControlService.getResourceInfo({
+    const rescInfo = await this.accessControlRepo.getResourceInfo({
       resc,
       roleId: userDetails.UserRoleMap.roleId,
       action: action.value,

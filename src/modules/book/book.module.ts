@@ -1,11 +1,22 @@
 import { Module } from "@nestjs/common";
 import { BookController } from "./controllers/book.controller";
-import { BookService } from "./services/book.service";
+import { BooksRepository } from "./repositories/book.repository";
 import { DbClient } from "src/common/services/dbclient.service";
+import { UserService } from "../user/services/user.service";
+import { ImagesRepository } from "../project/repositories/image.repository";
+import { S3Service } from "src/common/services/s3.service";
+import { ProjectModule } from "../project/project.module";
 
 @Module({
   controllers: [BookController],
-  providers: [BookService, DbClient],
-  exports: [BookService],
+  providers: [
+    BooksRepository,
+    DbClient,
+    ImagesRepository,
+    S3Service,
+    UserService,
+  ],
+  exports: [BooksRepository],
+  imports: [ProjectModule],
 })
 export class BookModule {}

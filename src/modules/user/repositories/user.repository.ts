@@ -2,9 +2,19 @@ import { Injectable } from "@nestjs/common";
 import { filterUserI, UserI } from "../interfaces/user.interface";
 import { DbClient } from "src/common/services/dbclient.service";
 import { prismaErrorMapper } from "src/common/mappers/prisma";
-import { Prisma } from "@prisma/client";
+import { Prisma, User } from "@prisma/client";
+
+export const userSelectObject = {
+  firstName: true,
+  lastName: true,
+  email: true,
+  mobile: true,
+  createdAt: true,
+  updatedAt: true,
+};
 
 export const userIncludeObject: Prisma.UserInclude = {
+  // ...userSelectObject,
   ProfileImage: true,
   UserRoleMap: {
     include: {
@@ -31,7 +41,7 @@ function firstUpperCase(s: string) {
 }
 
 @Injectable()
-export class UsersService {
+export class UsersRepository {
   constructor(private readonly dbClient: DbClient) {}
   async createUser(params: UserI) {
     const { roleId, ...rest } = params;
