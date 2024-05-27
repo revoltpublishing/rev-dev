@@ -1,12 +1,17 @@
 import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { DbClient } from "src/common/services/dbclient.service";
-import { BookI, filterBookI } from "../interfaces/book.interface";
-import { Prisma } from "@prisma/client";
+import {
+  BookI,
+  filterBookI,
+  getManyResponse,
+} from "../interfaces/book.interface";
+import { Book, BookUserMap, Prisma } from "@prisma/client";
 import { prismaErrorMapper } from "src/common/mappers/prisma";
-import { userIncludeObject } from "src/modules/user/services/users.service";
+import { userIncludeObject } from "src/modules/user/repositories/user.repository";
+import { DefaultArgs } from "@prisma/client/runtime/library";
 
 @Injectable()
-export class BookService {
+export class BooksRepository {
   constructor(private readonly dbClient: DbClient) {}
   buildFilterObject(params: filterBookI): Prisma.BookFindManyArgs {
     const obj: Prisma.BookFindManyArgs = {
@@ -15,7 +20,7 @@ export class BookService {
         BookUserMap: {
           include: {
             User: {
-              include: { UserRoleMap: true },
+              include: { UserRoleMap: true, ProfileImage: true },
             },
           },
         },
@@ -44,6 +49,7 @@ export class BookService {
       };
     return obj;
   }
+
   async createBook(params: BookI) {
     const { bookUsers, ...rest } = params;
     try {
@@ -70,8 +76,12 @@ export class BookService {
       data: { ...params },
     });
   }
+
   async getBooks(params: filterBookI) {
-    return this.dbClient.book.findMany({ ...this.buildFilterObject(params) });
+    const res = await this.dbClient.book.findMany(
+      this.buildFilterObject(params)
+    );
+    return res;
   }
   async getBooksCount(params: filterBookI) {
     params.offset = undefined;

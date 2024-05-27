@@ -1,5 +1,5 @@
 import { uploadImageI } from "src/modules/book/interfaces/book.interface";
-import { ImageService } from "../services/image.service";
+import { ImagesRepository } from "../repositories/image.repository";
 import { Body, Controller, Post } from "@nestjs/common";
 import { S3Service } from "src/common/services/s3.service";
 import { ProjectPaths } from "src/common/constants/paths";
@@ -7,12 +7,12 @@ import { ProjectPaths } from "src/common/constants/paths";
 @Controller("image")
 export class ImageController {
   constructor(
-    private readonly imageService: ImageService,
+    private readonly imagesRepo: ImagesRepository,
     private readonly s3Service: S3Service
   ) {}
 
   async handleFetchPresignedForDraft(body: uploadImageI) {
-    const img = await this.imageService.getDraftImage({
+    const img = await this.imagesRepo.getDraftImage({
       id: body.id,
     });
     const s3Path = img.Image.s3Path;
@@ -41,7 +41,7 @@ export class ImageController {
       path: s3Path,
       mimeType,
     });
-    const doc = await this.imageService.addImage({
+    const doc = await this.imagesRepo.addImage({
       title,
       s3Path,
       mimeType,
@@ -59,7 +59,7 @@ export class ImageController {
       ProjectPaths.S3_USER_PROFILE_IMG
     }/${title}${new Date().valueOf()}`;
 
-    const img = await this.imageService.getUserProfileImage({
+    const img = await this.imagesRepo.getUserProfileImage({
       id: body.id,
     });
     if (
@@ -76,13 +76,13 @@ export class ImageController {
       path: s3Path,
       mimeType,
     });
-    const doc = await this.imageService.addImage({
+    const doc = await this.imagesRepo.addImage({
       title,
       s3Path,
       mimeType,
       uploadedBy,
     });
-    await this.imageService.updateUserProfileImage({
+    await this.imagesRepo.updateUserProfileImage({
       imgId: doc.id,
       userId: body.id,
     });

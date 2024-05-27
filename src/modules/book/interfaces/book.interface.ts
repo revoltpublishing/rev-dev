@@ -1,3 +1,5 @@
+import { Prisma } from "@prisma/client";
+
 export interface BookI {
   title: string;
   description: string;
@@ -22,3 +24,14 @@ export interface filterBookI {
   offset: number;
   pg: number;
 }
+
+export type getManyResponse = Prisma.BookUserMapGetPayload<{
+  include: {
+    User: {
+      include: {
+        ProfileImage: true;
+        UserImageMap: true;
+      };
+    };
+  };
+}>;

@@ -4,7 +4,7 @@ import {
   NestModule,
   RequestMethod,
 } from "@nestjs/common";
-import { UsersModule } from "./modules/user/users.module";
+import { UsersModule } from "./modules/user/user.module";
 import { ProjectModule } from "./modules/project/project.module";
 import { BasicAuthMiddleware } from "./common/middlewares/userinfo.middleware";
 import { ConfigModule } from "@nestjs/config";

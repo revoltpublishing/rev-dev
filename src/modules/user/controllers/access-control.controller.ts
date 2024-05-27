@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Post, Req } from "@nestjs/common";
-import { AcessControlService } from "../services/acess-control.service";
+import { AcessControlRepository } from "../repositories/acess-control.repository";
 import {
   createResourceParamsI,
   resourceAttributeI,
@@ -7,7 +7,7 @@ import {
 
 @Controller("access-control")
 export class AccessControlController {
-  constructor(private readonly accessControlService: AcessControlService) {}
+  constructor(private readonly accessControlRepo: AcessControlRepository) {}
 
   @Get("/ping")
   async ping() {
@@ -15,11 +15,11 @@ export class AccessControlController {
   }
   @Post("/resource")
   async createResource(@Body() params: createResourceParamsI) {
-    return await this.accessControlService.createResource(params);
+    return await this.accessControlRepo.createResource(params);
   }
   @Post("/resource/attribute")
   async createResourceAttribute(@Body() params: resourceAttributeI) {
-    return await this.accessControlService.createResourceAttribute(params);
+    return await this.accessControlRepo.createResourceAttribute(params);
   }
 }
 
