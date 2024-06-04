@@ -21,7 +21,7 @@ export class UserService {
       path: s3Path,
       mimeType,
     });
-    const temp = { ...user, signedURL: signedURL };
+    const temp = { ...user, signedURL };
     return temp;
   }
 }

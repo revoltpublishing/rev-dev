@@ -11,12 +11,12 @@ import { S3Service } from "src/common/services/s3.service";
 import { UserService } from "./services/user.service";
 import { ProjectModule } from "../project/project.module";
 import { BookModule } from "../book/book.module";
+import { AccessMiddleware } from "src/common/middlewares/userinfo.middleware";
 
 @Module({
   controllers: [AccessControlController, UserController],
   providers: [
     AuthService,
-    AccessControlController,
     S3Service,
     AcessControlRepository,
     UsersRepository,
@@ -27,6 +27,6 @@ import { BookModule } from "../book/book.module";
     UserService,
   ],
   imports: [ProjectModule, BookModule],
-  exports: [AuthService, AccessControlController],
+  exports: [AuthService, AcessControlRepository],
 })
 export class UsersModule {}

@@ -6,9 +6,9 @@ import {
 } from "@nestjs/common";
 import { UsersModule } from "./modules/user/user.module";
 import { ProjectModule } from "./modules/project/project.module";
-import { BasicAuthMiddleware } from "./common/middlewares/userinfo.middleware";
 import { ConfigModule } from "@nestjs/config";
 import { BookModule } from "./modules/book/book.module";
+import { AccessMiddleware } from "./common/middlewares/userinfo.middleware";
 
 const AppEnvironmentModule = ConfigModule.forRoot({
   envFilePath: "./.env",
@@ -24,7 +24,7 @@ const AppEnvironmentModule = ConfigModule.forRoot({
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer;
-    // .apply(BasicAuthMiddleware)
+    // .apply(AccessMiddleware)
     // .exclude(
     //   { path: "/api/access-control/ping", method: RequestMethod.ALL },
     //   { path: "/api/access-control/resource", method: RequestMethod.ALL },

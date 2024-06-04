@@ -1,6 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { DbClient } from "src/common/services/dbclient.service";
 import { uploadImageI } from "src/modules/book/interfaces/book.interface";
+import { uploadBookStageImageI } from "../interfaces/images.interface";
 
 @Injectable()
 export class ImagesRepository {
@@ -11,7 +12,7 @@ export class ImagesRepository {
         name: params.title,
         s3Path: params.s3Path,
         mimeType: params.mimeType,
-        uploadedByUserId: params.uploadedBy,
+        uploadedBy: params.uploadedBy,
       },
     });
   }
@@ -42,5 +43,20 @@ export class ImagesRepository {
       where: { id: params.userId },
     });
   }
-  prepareSignedURLForUserProfile;
+  async addBookStageMapImage(params: uploadBookStageImageI) {
+    return this.dbClient.image.create({
+      data: {
+        name: params.name,
+        s3Path: params.s3Path,
+        uploadedBy: params.uploadedBy,
+        mimeType: params.mimeType,
+        BookStageImageMap: {
+          create: {
+            bookId: params.bookId,
+            stageId: params.stageId,
+          },
+        },
+      },
+    });
+  }
 }

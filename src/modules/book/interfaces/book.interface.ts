@@ -1,6 +1,6 @@
 import { Prisma } from "@prisma/client";
 
-export interface BookI {
+export interface bookI {
   title: string;
   description: string;
   bookUsers: string[];
@@ -17,6 +17,12 @@ export interface uploadImageI {
   mimeType: string;
 }
 
+export interface uploadImageReqI {
+  id: string;
+  title: string;
+  s3Path: string;
+  mimeType: string;
+}
 export interface filterBookI {
   search: string;
   stageId: number;
@@ -35,3 +41,23 @@ export type getManyResponse = Prisma.BookUserMapGetPayload<{
     };
   };
 }>;
+
+export interface addBookStageI {
+  bookId: string;
+  stageId: number;
+  requirements: string;
+}
+
+export interface updateBookStageI {
+  bookId: string;
+  stageId: number;
+  isActive?: boolean;
+  isAccepted?: boolean;
+  isWorking?: boolean;
+  isCompleted?: boolean;
+  isSubmitted?: boolean;
+}
+export interface bookUserI {
+  bookId: string;
+  userId: string;
+}

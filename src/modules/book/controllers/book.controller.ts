@@ -1,16 +1,21 @@
-import { Body, Controller, Post } from "@nestjs/common";
+import { Body, Controller, Param, Post, Put } from "@nestjs/common";
 import { BooksRepository } from "../repositories/book.repository";
-import { BookI, filterBookI } from "../interfaces/book.interface";
+import {
+  addBookStageI,
+  bookI,
+  filterBookI,
+  updateBookStageI,
+} from "../interfaces/book.interface";
 import { UserService } from "src/modules/user/services/user.service";
 
-@Controller("book")
+@Controller("books")
 export class BookController {
   constructor(
     private readonly booksRepo: BooksRepository,
     private readonly usersService: UserService
   ) {}
   @Post("/add")
-  addBook(@Body() body: BookI) {
+  addBook(@Body() body: bookI) {
     return this.booksRepo.createBook({ ...body });
   }
   @Post("/lookup")
@@ -27,5 +32,13 @@ export class BookController {
       })
     );
     return { count, list: listRes };
+  }
+  @Post("/:id/stage/add")
+  addBookStage(@Param("id") id: string, @Body() body: addBookStageI) {
+    return this.booksRepo.addBookStageDetails(body);
+  }
+  @Put("/:id/stage")
+  updateBookStage(@Param("id") id: string, @Body() body: updateBookStageI) {
+    return this.booksRepo.updateBookStage(body);
   }
 }

@@ -6,9 +6,10 @@ import { UserService } from "../user/services/user.service";
 import { ImagesRepository } from "../project/repositories/image.repository";
 import { S3Service } from "src/common/services/s3.service";
 import { ProjectModule } from "../project/project.module";
+import { DraftController } from "./controllers/draft.controller";
 
 @Module({
-  controllers: [BookController],
+  controllers: [BookController, DraftController],
   providers: [
     BooksRepository,
     DbClient,
