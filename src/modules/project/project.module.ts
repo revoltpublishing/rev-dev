@@ -1,4 +1,9 @@
-import { Module } from "@nestjs/common";
+import {
+  MiddlewareConsumer,
+  Module,
+  NestModule,
+  RequestMethod,
+} from "@nestjs/common";
 import { ImagesRepository } from "./repositories/image.repository";
 import { ImageController } from "./controllers/image.controller";
 import { DbClient } from "src/common/services/dbclient.service";

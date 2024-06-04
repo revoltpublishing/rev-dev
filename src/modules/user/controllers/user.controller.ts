@@ -16,8 +16,9 @@ import { BooksRepository } from "src/modules/book/repositories/book.repository";
 import { MessageError } from "src/common/constants/status";
 import { AcessControlRepository } from "../repositories/acess-control.repository";
 import { UserService } from "../services/user.service";
+import { User } from "@prisma/client";
 
-@Controller("user")
+@Controller("users")
 export class UserController {
   constructor(
     private readonly usersRepo: UsersRepository,
@@ -52,6 +53,8 @@ export class UserController {
   }
   @Post("/lookup")
   async list(@Body() body: filterUserI) {
+    let list: User[];
+    let count: number;
     if (body.role) {
       const roleId = (
         await this.accessControlRepo.getRoleByRole({ role: body.role })
@@ -59,8 +62,10 @@ export class UserController {
       body.roleId = roleId;
     }
     try {
-      const list = await this.usersRepo.getUsers({ ...body });
-      const count = await this.usersRepo.getUsersCount({ ...body });
+      Promise.all([
+        (list = await this.usersRepo.getUsers({ ...body })),
+        (count = await this.usersRepo.getUsersCount({ ...body })),
+      ]);
       const listRes = await Promise.all(
         list.map((v) => this.usersService.getUserWithImage(v))
       );

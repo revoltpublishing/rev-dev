@@ -1,14 +1,14 @@
-import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { DbClient } from "src/common/services/dbclient.service";
 import {
-  BookI,
+  addBookStageI,
+  bookI,
+  bookUserI,
   filterBookI,
-  getManyResponse,
+  updateBookStageI,
 } from "../interfaces/book.interface";
-import { Book, BookUserMap, Prisma } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import { prismaErrorMapper } from "src/common/mappers/prisma";
-import { userIncludeObject } from "src/modules/user/repositories/user.repository";
-import { DefaultArgs } from "@prisma/client/runtime/library";
 
 @Injectable()
 export class BooksRepository {
@@ -43,14 +43,14 @@ export class BooksRepository {
         ...obj.where,
         BookStage: {
           some: {
-            stage: params.stageId,
+            stageId: params.stageId,
           },
         },
       };
     return obj;
   }
 
-  async createBook(params: BookI) {
+  async createBook(params: bookI) {
     const { bookUsers, ...rest } = params;
     try {
       return await this.dbClient.book.create({
@@ -71,17 +71,14 @@ export class BooksRepository {
       throw prismaErrorMapper(e);
     }
   }
-  async addUserToBook(params: { bookId: string; userId: string }) {
+  async addUserToBook(params: bookUserI) {
     return this.dbClient.bookUserMap.create({
       data: { ...params },
     });
   }
 
   async getBooks(params: filterBookI) {
-    const res = await this.dbClient.book.findMany(
-      this.buildFilterObject(params)
-    );
-    return res;
+    return await this.dbClient.book.findMany(this.buildFilterObject(params));
   }
   async getBooksCount(params: filterBookI) {
     params.offset = undefined;
@@ -90,5 +87,19 @@ export class BooksRepository {
       ...this.buildFilterObject(params),
     });
     return res.length;
+  }
+  async addBookStageDetails(params: addBookStageI) {
+    return this.dbClient.bookStage.create({
+      data: params,
+    });
+  }
+  async updateBookStage(params: updateBookStageI) {
+    const { bookId, stageId, ...rest } = params;
+    return this.dbClient.bookStage.update({
+      where: {
+        bookId_stageId: { bookId, stageId },
+      },
+      data: { ...rest },
+    });
   }
 }

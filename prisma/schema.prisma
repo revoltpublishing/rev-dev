@@ -32,6 +32,7 @@ model User {
   BookUserMap     BookUserMap[]
   UserRoleMap     UserRoleMap?
   ProfileImage    Image?       @relation(name: "FK_PROFILE_IMAGE_ID",fields: [profileImageId],references: [id])
+  
   @@index([createdAt])
   @@index([accessToken])
 }
@@ -41,18 +42,18 @@ model Image {
   name                String
   s3Path              String
   mimeType            String
-  uploadedByUserId    String
+  uploadedBy    String
   isActive            Int                   @default(1)
   uploaded            Int                   @default(0)
   createdAt           DateTime              @default(now())
   updatedAt           DateTime              @default(now())
-  User                User                  @relation(name: "FK_USER_IMAGE_ID",fields: [uploadedByUserId], references: [id])
+  User                User                  @relation(name: "FK_USER_IMAGE_ID",fields: [uploadedBy], references: [id])
   
   UserImageMap        UserImageMap[]
   BookStageImageMap   BookStageImageMap[]
   Book                Book?
   UserImage           User?                  @relation(name: "FK_PROFILE_IMAGE_ID")            
-  @@index([uploadedByUserId], name: "FK_IMAGE_UPLOADED_BY_USER_ID_idx")
+  @@index([uploadedBy], name: "FK_IMAGE_UPLOADED_BY_USER_ID_idx")
   @@index([createdAt])
 }
 
@@ -82,8 +83,10 @@ model Book {
 
   BookStage           BookStage[]
   BookUserMap     BookUserMap[]
+  BookDraftCharacter  BookDraftCharacter[]
   Image                Image                  @relation(fields: [draftId], references: [id])
 
+  @@index([id])
 }
 
 model BookUserMap {
@@ -102,35 +105,71 @@ model BookUserMap {
 }
 
 model BookStage {
-  id      String           @id @default(uuid())
   bookId  String
-  stage   Int
-  isAccepted  Boolean   @default(false)
-  isActive  Boolean   @default(false)
-  isWorking    Boolean   @default(false)
-  isCompleted  Boolean   @default(false)
-  isSubmitted  Boolean   @default(false)
-  requirement        String     
+  stageId   Int
+  isAccepted  Boolean   @default(false) // when stage has been submitted and reviewed by author
+  isActive  Boolean   @default(false) // when stage is applied 
+  isWorking    Boolean   @default(false) // work on stage is in progress
+  isCompleted  Boolean   @default(false) // is stage completed by concerned party
+  isSubmitted  Boolean   @default(false) // is stage submitted by concerned party
+  requirements        String     
 
   createdAt           DateTime              @default(now())
   updatedAt           DateTime              @default(now())
 
-  Book         Book       @relation(fields: [bookId], references: [id])
   BookStageImageMap   BookStageImageMap[]
+  
+  Book         Book       @relation(fields: [bookId], references: [id])
+  
   @@index([bookId], name : "FK_BOOK_ID_STAGE_idx")
-
+  @@id([bookId,stageId])
 }
 
 
 model BookStageImageMap {
   id      Int           @id @default(autoincrement())
-  bookStageId  String
+  bookId  String
+  stageId   Int
   imageId     String
   createdAt           DateTime              @default(now())
   updatedAt           DateTime              @default(now())
 
   Image                Image                  @relation(fields: [imageId], references: [id])
-  BookStage         BookStage                  @relation(fields: [bookStageId], references: [id])
+  BookStage         BookStage                  @relation(fields: [bookId,stageId], references: [bookId,stageId])
+  
+  @@index([bookId,stageId])
+}
+
+model BookDraftCharacter {
+  id      String    @id @default(uuid())
+  bookId  String
+  pageNo  String
+  character String
+  prevId  String?   @unique
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @default(now())
+
+  BookDraftCharacterChanges BookDraftCharacterChanges[]
+
+  Book         Book       @relation(fields: [bookId], references: [id])
+  prevChar  BookDraftCharacter? @relation("PREV_CHAR_BK_CHR_ID",fields: [prevId],references: [id])
+  nextChar BookDraftCharacter? @relation("PREV_CHAR_BK_CHR_ID")
+
+  @@index([pageNo,bookId])
+}
+
+model BookDraftCharacterChanges {
+  id      String    @id @default(uuid())
+  bookDraftCharacterId    String    
+  operation Int
+  pos       Int
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @default(now())
+
+  BookDraftCharacter BookDraftCharacter @relation(fields: [bookDraftCharacterId],references: [id])
+  
+  @@index([bookDraftCharacterId])
+
 }
 
 
@@ -168,8 +207,8 @@ model ResourceAttribute {
   updatedAt            DateTime         @default(now())
 
   ResourceAttributePermission   ResourceAttributePermission[]
-
   Resource Resource @relation(fields: [resourceId], references: [id])
+  
   @@index([resourceId], name: "FK_RA_RESOURCE_ID_idx")
   @@unique([resourceId,name,value])
 }
