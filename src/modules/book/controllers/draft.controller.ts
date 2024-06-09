@@ -1,27 +1,20 @@
-import { uploadImageI } from "src/modules/book/interfaces/book.interface";
-import { Body, Controller, Post, Req } from "@nestjs/common";
-import { S3Service } from "src/common/services/s3.service";
+import {
+  uploadImageI,
+  uploadImageParamsI,
+} from "src/modules/book/interfaces/book.interface";
+import { Body, Controller, Get, Param, Post, Req } from "@nestjs/common";
 import { ProjectPaths } from "src/common/constants/paths";
-import { ImagesRepository } from "src/modules/project/repositories/image.repository";
+import { ImageFormats } from "../constants/formats";
+import { DynamicStatusCodes } from "src/common/constants/status";
+import { DraftService } from "../services/draft.service";
+import { DraftRepository } from "../repositories/draft.repository";
 
 @Controller("books/draft")
 export class DraftController {
   constructor(
-    private readonly imagesRepo: ImagesRepository,
-    private readonly s3Service: S3Service
+    private readonly draftService: DraftService,
+    private readonly draftRepo: DraftRepository
   ) {}
-  async handleFetchPresignedForDraft(body: uploadImageI) {
-    const img = await this.imagesRepo.getDraftImage({
-      id: body.id,
-    });
-    const s3Path = img.Image.s3Path;
-    const mimeType = img.Image.mimeType;
-    const signedURL = await this.s3Service.getPresignedURL({
-      path: s3Path,
-      mimeType,
-    });
-    return { signedURL };
-  }
   @Post("/presigned")
   async uploadBookDraft(
     @Body()
@@ -31,23 +24,38 @@ export class DraftController {
   ) {
     const uploadedBy = req["context"]["userDetails"]?.id;
     const { title } = body;
-    let { mimeType } = body;
+    const { mimeType } = body;
+    if (!ImageFormats.DRAFT_ACCEPTED_FORMATS.includes(mimeType))
+      throw DynamicStatusCodes.INVAID_DOCUMENT_FORMAT(
+        ImageFormats.DRAFT_ACCEPTED_FORMATS.join(",")
+      );
     let s3Path: string = `${
       ProjectPaths.S3_BOOK_DRAFT
     }/${title}${new Date().valueOf()}`;
     if (body.id) {
-      return this.handleFetchPresignedForDraft(body);
+      return this.draftService.fetchPresignedForDraft({ bookId: body.id });
     }
-    const signedURL = await this.s3Service.getPresignedURLForUpload({
-      path: s3Path,
-      mimeType,
-    });
-    const doc = await this.imagesRepo.addImage({
-      title,
+    const { signedURL, doc } = await this.draftService.addBookDraftImage({
+      ...body,
       s3Path,
-      mimeType,
       uploadedBy,
     });
     return { signedURL, id: doc.id };
+  }
+  @Get("/:id/prepare")
+  async prepareDraft(
+    @Param()
+    params: uploadImageParamsI
+  ) {
+    return await this.draftService.prepareDraft({ bookId: params.id });
+  }
+  @Get("/:id/pages/:pageNo")
+  async getDraftCharacterByPage(
+    @Param() params: { id: string; pageNo: number }
+  ) {
+    return this.draftRepo.getDraftCharactersByPage({
+      bookId: params.id,
+      pageNo: Number(params.pageNo),
+    });
   }
 }

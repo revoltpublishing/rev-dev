@@ -2,9 +2,10 @@ import { HttpException, HttpStatus } from "@nestjs/common";
 
 export class MessageError extends Error {
   status: number;
-  constructor(message) {
+  constructor(e) {
     super();
-    this.message = message;
+    this.status = e.status;
+    this.message = e.message;
   }
 }
 
@@ -21,14 +22,23 @@ export class StatusCodes {
     "You are not allowed",
     HttpStatus.NOT_ACCEPTABLE
   );
+  public static readonly INVALID_BOOK_STAGE_REDIRECTION = new HttpException(
+    "Book can't move to the provided state, as it has dependency on some other stages",
+    HttpStatus.NOT_ACCEPTABLE
+  );
 }
 export class DbStatusCodes {
+  public static readonly DUPLICATED_FIELD = (str: string) =>
+    new HttpException(
+      `${str} field value already exists.`,
+      HttpStatus.NOT_ACCEPTABLE
+    );
   public static readonly EMAIL_ALREADY_OCCUPIED = new HttpException(
-    "email",
+    "email should be unique",
     HttpStatus.NOT_ACCEPTABLE
   );
   public static readonly MOBILE_ALREADY_OCCUPIED = new HttpException(
-    "mobile",
+    "mobile should be unique",
     HttpStatus.NOT_ACCEPTABLE
   );
   public static readonly ERROR_IN_SAVING_DETAILS = new HttpException(
@@ -39,4 +49,12 @@ export class DbStatusCodes {
     "role doesn't exists",
     HttpStatus.NOT_FOUND
   );
+}
+
+export class DynamicStatusCodes {
+  public static readonly INVAID_DOCUMENT_FORMAT = (args: string) =>
+    new HttpException(
+      `This type of format of document is not allowed, please provide in formats: ${args}`,
+      HttpStatus.NOT_ACCEPTABLE
+    );
 }

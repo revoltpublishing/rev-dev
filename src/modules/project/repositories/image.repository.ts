@@ -23,7 +23,7 @@ export class ImagesRepository {
     return this.dbClient.book.findFirst({
       where: { id: params.id },
       include: {
-        Image: true,
+        BookDraft: true,
       },
     });
   }

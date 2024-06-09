@@ -7,6 +7,9 @@ import { ImagesRepository } from "../project/repositories/image.repository";
 import { S3Service } from "src/common/services/s3.service";
 import { ProjectModule } from "../project/project.module";
 import { DraftController } from "./controllers/draft.controller";
+import { BooksService } from "./services/books.service";
+import { DraftRepository } from "./repositories/draft.repository";
+import { DraftService } from "./services/draft.service";
 
 @Module({
   controllers: [BookController, DraftController],
@@ -16,6 +19,9 @@ import { DraftController } from "./controllers/draft.controller";
     ImagesRepository,
     S3Service,
     UserService,
+    BooksService,
+    DraftRepository,
+    DraftService,
   ],
   exports: [BooksRepository],
   imports: [ProjectModule],

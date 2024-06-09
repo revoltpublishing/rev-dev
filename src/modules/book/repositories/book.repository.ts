@@ -68,7 +68,7 @@ export class BooksRepository {
         },
       });
     } catch (e) {
-      throw prismaErrorMapper(e);
+      throw prismaErrorMapper(e.message);
     }
   }
   async addUserToBook(params: bookUserI) {
@@ -100,6 +100,43 @@ export class BooksRepository {
         bookId_stageId: { bookId, stageId },
       },
       data: { ...rest },
+    });
+  }
+  async getBookStage(params: { bookId: string; stageId: number }) {
+    return await this.dbClient.bookStage.findFirst({
+      where: { bookId: params.bookId, stageId: params.stageId },
+      include: {
+        BookStageImageMap: {
+          include: { Image: {} },
+        },
+      },
+    });
+  }
+  async getBookStages(params: { bookId: string }) {
+    return await this.dbClient.bookStage.findMany({
+      where: { bookId: params.bookId },
+      include: {
+        BookStageImageMap: {
+          include: { Image: {} },
+        },
+      },
+    });
+  }
+  async getBookById(params: { id: string }) {
+    return this.dbClient.book.findFirst({
+      where: { id: params.id },
+      include: {
+        BookStage: {
+          include: {
+            BookStageImageMap: {
+              include: {
+                Image: true,
+              },
+            },
+          },
+        },
+        BookDraft: {},
+      },
     });
   }
 }

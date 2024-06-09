@@ -23,19 +23,15 @@ const AppEnvironmentModule = ConfigModule.forRoot({
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer;
-    // .apply(AccessMiddleware)
-    // .exclude(
-    //   { path: "/api/access-control/ping", method: RequestMethod.ALL },
-    //   { path: "/api/access-control/resource", method: RequestMethod.ALL },
-    //   {
-    //     path: "/api/access-control/resource/attribute",
-    //     method: RequestMethod.ALL,
-    //   }
-    // )
-    // .forRoutes({
-    //   path: "*",
-    //   method: RequestMethod.ALL,
-    // });
+    consumer
+      .apply(AccessMiddleware)
+      .exclude(
+        { path: "/api/access-control/ping", method: RequestMethod.ALL },
+        { path: "/api/users/add", method: RequestMethod.POST }
+      )
+      .forRoutes({
+        path: "*",
+        method: RequestMethod.ALL,
+      });
   }
 }

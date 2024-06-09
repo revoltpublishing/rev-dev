@@ -44,7 +44,8 @@ export class UserController {
         userId: ud.id,
       });
     }
-    return { message: "created successfully" };
+    ud.password = "";
+    return { message: "created successfully", user: ud };
   }
   @Get("/here")
   @UseGuards(LoggedInGuard)
