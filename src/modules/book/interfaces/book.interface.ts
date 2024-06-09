@@ -5,8 +5,9 @@ export interface bookI {
   description: string;
   bookUsers: string[];
   stage: string;
+  createdBy: string;
   stageId: number;
-  draftId: string;
+  draftImageId: string;
 }
 
 export interface uploadImageI {
@@ -15,6 +16,9 @@ export interface uploadImageI {
   uploadedBy: string;
   s3Path: string;
   mimeType: string;
+}
+export interface uploadImageParamsI {
+  id: string;
 }
 
 export interface uploadImageReqI {
@@ -45,9 +49,14 @@ export type getManyResponse = Prisma.BookUserMapGetPayload<{
 export interface addBookStageI {
   bookId: string;
   stageId: number;
+  stage: string;
   requirements: string;
 }
-
+export interface addBookStageReqI {
+  bookId: string;
+  stage: string;
+  requirements: string;
+}
 export interface updateBookStageI {
   bookId: string;
   stageId: number;

@@ -106,4 +106,10 @@ export class UsersRepository {
     });
     return res.length;
   }
+  async getUserById(params: { id: string }) {
+    return this.dbClient.user.findFirst({
+      where: { id: params.id },
+      select: userSelectObject,
+    });
+  }
 }

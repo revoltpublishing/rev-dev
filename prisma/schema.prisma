@@ -24,11 +24,13 @@ model User {
   accessToken   String  @default(uuid()) @unique()
   profileImageId  String?  @unique()      
   isActive      Boolean @default(true)
+  // createdBy    String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   Image           Image[]       @relation(name:"FK_USER_IMAGE_ID")
   UserImageMap    UserImageMap[]
+  Book            Book[]
   BookUserMap     BookUserMap[]
   UserRoleMap     UserRoleMap?
   ProfileImage    Image?       @relation(name: "FK_PROFILE_IMAGE_ID",fields: [profileImageId],references: [id])
@@ -44,7 +46,6 @@ model Image {
   mimeType            String
   uploadedBy    String
   isActive            Int                   @default(1)
-  uploaded            Int                   @default(0)
   createdAt           DateTime              @default(now())
   updatedAt           DateTime              @default(now())
   User                User                  @relation(name: "FK_USER_IMAGE_ID",fields: [uploadedBy], references: [id])
@@ -74,18 +75,18 @@ model Book {
   id                  String                   @id @default(uuid())
   title               String
   description         String
-  draftId             String                @unique()
+  draftImageId             String                @unique()
+  createdBy           String
   createdAt           DateTime              @default(now())
   updatedAt           DateTime              @default(now())
-
 
   // *********************************  draft details to be added  ****************************
 
   BookStage           BookStage[]
   BookUserMap     BookUserMap[]
-  BookDraftCharacter  BookDraftCharacter[]
-  Image                Image                  @relation(fields: [draftId], references: [id])
-
+  BookDraftPageCharacter  BookDraftPageCharacter[]
+  BookDraft                Image                  @relation(fields: [draftImageId], references: [id])
+  BookCreatedByUser       User                   @relation(fields: [createdBy], references: [id])
   @@index([id])
 }
 
@@ -108,12 +109,11 @@ model BookStage {
   bookId  String
   stageId   Int
   isAccepted  Boolean   @default(false) // when stage has been submitted and reviewed by author
-  isActive  Boolean   @default(false) // when stage is applied 
+  isActive  Boolean   @default(true) // when stage is applied 
   isWorking    Boolean   @default(false) // work on stage is in progress
   isCompleted  Boolean   @default(false) // is stage completed by concerned party
   isSubmitted  Boolean   @default(false) // is stage submitted by concerned party
   requirements        String     
-
   createdAt           DateTime              @default(now())
   updatedAt           DateTime              @default(now())
 
@@ -140,35 +140,36 @@ model BookStageImageMap {
   @@index([bookId,stageId])
 }
 
-model BookDraftCharacter {
+model BookDraftPageCharacter {
   id      String    @id @default(uuid())
   bookId  String
-  pageNo  String
+  pageNo  Int
   character String
   prevId  String?   @unique
   createdAt           DateTime              @default(now())
   updatedAt           DateTime              @default(now())
 
-  BookDraftCharacterChanges BookDraftCharacterChanges[]
+  BookDraftCharacterStageChanges BookDraftCharacterStageChanges[]
 
   Book         Book       @relation(fields: [bookId], references: [id])
-  prevChar  BookDraftCharacter? @relation("PREV_CHAR_BK_CHR_ID",fields: [prevId],references: [id])
-  nextChar BookDraftCharacter? @relation("PREV_CHAR_BK_CHR_ID")
+  prevChar  BookDraftPageCharacter? @relation("PREV_CHAR_BK_CHR_ID",fields: [prevId],references: [id])
+  nextChar BookDraftPageCharacter? @relation("PREV_CHAR_BK_CHR_ID")
 
-  @@index([pageNo,bookId])
+  @@index([bookId,pageNo])
 }
 
-model BookDraftCharacterChanges {
+model BookDraftCharacterStageChanges {
   id      String    @id @default(uuid())
-  bookDraftCharacterId    String    
+  bookDraftPageCharacterId    String    
+  stageId   Int
   operation Int
   pos       Int
   createdAt           DateTime              @default(now())
   updatedAt           DateTime              @default(now())
 
-  BookDraftCharacter BookDraftCharacter @relation(fields: [bookDraftCharacterId],references: [id])
+  BookDraftPageCharacter BookDraftPageCharacter @relation(fields: [bookDraftPageCharacterId],references: [id])
   
-  @@index([bookDraftCharacterId])
+  @@index([bookDraftPageCharacterId])
 
 }
 
