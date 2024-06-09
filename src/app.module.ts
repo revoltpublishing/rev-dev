@@ -26,8 +26,8 @@ export class AppModule implements NestModule {
     consumer
       .apply(AccessMiddleware)
       .exclude(
-        { path: "/api/access-control/ping", method: RequestMethod.ALL },
-        { path: "/api/users/add", method: RequestMethod.POST }
+        { path: "access-control/ping", method: RequestMethod.ALL },
+        { path: "users/add", method: RequestMethod.POST }
       )
       .forRoutes({
         path: "*",
