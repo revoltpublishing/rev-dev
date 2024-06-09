@@ -11,7 +11,7 @@ export class UserService {
   ) {}
 
   async getUserWithImage(user: User) {
-    if (user.profileImageId === null) return user;
+    if (user.profileImageId === undefined) return user;
     const img = await this.imagesRepo.getImageById({
       id: user.profileImageId,
     });
