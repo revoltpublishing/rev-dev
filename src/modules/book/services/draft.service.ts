@@ -20,6 +20,7 @@ export class DraftService {
     const img = await this.imagesRepo.getDraftImage({
       id: body.bookId,
     });
+    if (!img) return;
     const s3Path = img.BookDraft.s3Path;
     const mimeType = img.BookDraft.mimeType;
     const signedURL = await this.s3Service.getPresignedURL({
@@ -86,7 +87,7 @@ export class DraftService {
       const bkCh = await this.draftRepo.addDraftPageCharacter({
         bookId,
         pageNo: pages.length + 1,
-        character: paragraph + "</p>",
+        char: paragraph + "</p>",
         prevId: prevId.length > 0 ? prevId : undefined,
       });
       prevId = bkCh.id; // No need to use repeat(1) as it does nothing here

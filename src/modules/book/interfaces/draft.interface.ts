@@ -1,6 +1,6 @@
 export interface addBookDraftPageCharacterI {
   bookId: string;
   pageNo: number;
-  character: string;
+  char: string;
   prevId: string | null;
 }
