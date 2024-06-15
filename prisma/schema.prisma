@@ -14,229 +14,239 @@ datasource db {
 }
 
 model User {
-  id          String      @id @default(uuid())
-  firstName   String   
-  lastName    String
-  email       String   @unique()
-  mobile      String  @unique()
-  password    String
-  mobileRegion  String 
-  accessToken   String  @default(uuid()) @unique()
-  profileImageId  String?  @unique()      
-  isActive      Boolean @default(true)
-  // createdBy    String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id             String   @id @default(uuid())
+  firstName      String
+  lastName       String
+  email          String   @unique()
+  mobile         String   @unique()
+  password       String
+  mobileRegion   String
+  accessToken    String   @unique() @default(uuid())
+  profileImageId String?  @unique()
+  isActive       Boolean  @default(true)
+  createdBy      String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
-  Image           Image[]       @relation(name:"FK_USER_IMAGE_ID")
-  UserImageMap    UserImageMap[]
-  Book            Book[]
-  BookUserMap     BookUserMap[]
-  UserRoleMap     UserRoleMap?
-  ProfileImage    Image?       @relation(name: "FK_PROFILE_IMAGE_ID",fields: [profileImageId],references: [id])
-  
+  Image                   Image[]                   @relation(name: "FK_USER_IMAGE_ID")
+  UserImageMap            UserImageMap[]
+  Book                    Book[]
+  BookUserMap             BookUserMap[]
+  UserRoleMap             UserRoleMap?
+  ProfileImage            Image?                    @relation(name: "FK_PROFILE_IMAGE_ID", fields: [profileImageId], references: [id])
+  BookStageManuscriptPage BookStageManuscriptPage[]
+
   @@index([createdAt])
   @@index([accessToken])
 }
 
 model Image {
-  id                  String                   @id @default(uuid())
-  name                String
-  s3Path              String
-  mimeType            String
-  uploadedBy    String
-  isActive            Int                   @default(1)
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @default(now())
-  User                User                  @relation(name: "FK_USER_IMAGE_ID",fields: [uploadedBy], references: [id])
-  
-  UserImageMap        UserImageMap[]
-  BookStageImageMap   BookStageImageMap[]
-  Book                Book?
-  UserImage           User?                  @relation(name: "FK_PROFILE_IMAGE_ID")            
+  id         String   @id @default(uuid())
+  name       String
+  s3Path     String
+  mimeType   String
+  uploadedBy String
+  isActive   Int      @default(1)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt()
+  User       User     @relation(name: "FK_USER_IMAGE_ID", fields: [uploadedBy], references: [id])
+
+  UserImageMap      UserImageMap[]
+  BookStageImageMap BookStageImageMap[]
+  Book              Book?
+  UserImage         User?               @relation(name: "FK_PROFILE_IMAGE_ID")
+
   @@index([uploadedBy], name: "FK_IMAGE_UPLOADED_BY_USER_ID_idx")
   @@index([createdAt])
 }
 
 model UserImageMap {
-  id        Int   @id @default(autoincrement())
+  id        Int      @id @default(autoincrement())
   userId    String
   imageId   String
-  isActive  Int       
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @default(now())
+  isActive  Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
 
-  User                User                  @relation(fields: [userId], references: [id])
-  Image                Image                  @relation(fields: [imageId], references: [id])
-
+  User  User  @relation(fields: [userId], references: [id])
+  Image Image @relation(fields: [imageId], references: [id])
 }
 
 model Book {
-  id                  String                   @id @default(uuid())
-  title               String
-  description         String
-  draftImageId             String                @unique()
-  createdBy           String
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @default(now())
+  id           String   @id @default(uuid())
+  title        String
+  description  String
+  draftImageId String   @unique()
+  createdBy    String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt()
 
-  // *********************************  draft details to be added  ****************************
+  BookStage         BookStage[]
+  BookUserMap       BookUserMap[]
+  BookDraft         Image         @relation(fields: [draftImageId], references: [id])
+  BookCreatedByUser User          @relation(fields: [createdBy], references: [id])
 
-  BookStage           BookStage[]
-  BookUserMap     BookUserMap[]
-  BookDraftPageCharacter  BookDraftPageCharacter[]
-  BookDraft                Image                  @relation(fields: [draftImageId], references: [id])
-  BookCreatedByUser       User                   @relation(fields: [createdBy], references: [id])
   @@index([id])
 }
 
 model BookUserMap {
-  id      Int           @id @default(autoincrement())
-  bookId  String
-  userId  String
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @default(now())
+  id        Int      @id @default(autoincrement())
+  bookId    String
+  userId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
 
-  User      User     @relation(fields: [userId], references: [id])
-  Book         Book       @relation(fields: [bookId], references: [id])
+  User User @relation(fields: [userId], references: [id])
+  Book Book @relation(fields: [bookId], references: [id])
 
-  @@index([userId], name : "FK_BOOK_USER_ID_idx")
-  @@unique([bookId,userId])
-
+  @@unique([bookId, userId])
+  @@index([userId], name: "FK_BOOK_USER_ID_idx")
 }
 
 model BookStage {
-  bookId  String
-  stageId   Int
-  isAccepted  Boolean   @default(false) // when stage has been submitted and reviewed by author
-  isActive  Boolean   @default(true) // when stage is applied 
-  isWorking    Boolean   @default(false) // work on stage is in progress
-  isCompleted  Boolean   @default(false) // is stage completed by concerned party
-  isSubmitted  Boolean   @default(false) // is stage submitted by concerned party
-  requirements        String     
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @default(now())
+  id           String   @id @default(uuid())
+  bookId       String
+  stageId      Int
+  isAccepted   Boolean  @default(false) // when stage has been submitted and reviewed by author
+  isActive     Boolean  @default(true) // when stage is applied 
+  isWorking    Boolean  @default(false) // work on stage is in progress
+  isCompleted  Boolean  @default(false) // is stage completed by concerned party
+  isSubmitted  Boolean  @default(false) // is stage submitted by concerned party
+  requirements String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt()
 
-  BookStageImageMap   BookStageImageMap[]
-  
-  Book         Book       @relation(fields: [bookId], references: [id])
-  
-  @@index([bookId], name : "FK_BOOK_ID_STAGE_idx")
-  @@id([bookId,stageId])
+  BookStageImageMap BookStageImageMap[]
+
+  Book                Book                  @relation(fields: [bookId], references: [id])
+  BookStageManuscript BookStageManuscript[]
+
+  @@index([bookId], name: "FK_BOOK_ID_STAGE_idx")
 }
-
 
 model BookStageImageMap {
-  id      Int           @id @default(autoincrement())
-  bookId  String
-  stageId   Int
-  imageId     String
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @default(now())
+  id        Int      @id @default(autoincrement())
+  bkStgId   String
+  imageId   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
 
-  Image                Image                  @relation(fields: [imageId], references: [id])
-  BookStage         BookStage                  @relation(fields: [bookId,stageId], references: [bookId,stageId])
-  
-  @@index([bookId,stageId])
+  Image     Image     @relation(fields: [imageId], references: [id])
+  BookStage BookStage @relation(fields: [bkStgId], references: [id])
+
+  @@index([bkStgId])
 }
 
-model BookDraftPageCharacter {
-  id      String    @id @default(uuid())
-  bookId  String
-  pageNo  Int
-  character String
-  prevId  String?   @unique
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @default(now())
+model BookStageManuscript {
+  id          String   @id @default(uuid())
+  bkStgId     String
+  name        String
+  parentId    String?
+  isWorking   Boolean  @default(false)
+  isSubmitted Boolean  @default(false)
+  isAccepted  Boolean  @default(false)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt()
 
+  BookStage               BookStage                 @relation(fields: [bkStgId], references: [id])
+  parentManuscriptId      BookStageManuscript?      @relation("PREV_MANUSCRPT_BK_ID", fields: [parentId], references: [id])
+  otherManuscriptId       BookStageManuscript[]     @relation("PREV_MANUSCRPT_BK_ID")
+  BookStageManuscriptPage BookStageManuscriptPage[]
 
-  Book         Book       @relation(fields: [bookId], references: [id])
-  prevChar  BookDraftPageCharacter? @relation("PREV_CHAR_BK_CHR_ID",fields: [prevId],references: [id])
-  nextChar BookDraftPageCharacter? @relation("PREV_CHAR_BK_CHR_ID")
-
-  @@index([bookId,pageNo])
+  @@index([bkStgId, parentId], name: "IDX_MANUSCRIPT_BKSTG_PRNT")
 }
 
+model BookStageManuscriptPage {
+  id         String @id @default(uuid())
+  page       Int
+  content    String
+  bkStgManId String
 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
+  updatedBy String?
+
+  BookStageManuscript         BookStageManuscript @relation(references: [id], fields: [bkStgManId])
+  BookStageManucriptUpdatedBy User?               @relation(fields: [updatedBy], references: [id])
+}
 
 // *****************************  ACL TABLES STARTED ****************************************
 
 model RoleMaster {
-  id                   Int              @id
-  role                 String           @unique
-  createdAt            DateTime         @default(now())
-  updatedAt            DateTime         @default(now())
+  id        Int      @id
+  role      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
 
-  UserRoleMap   UserRoleMap[]
-  ResourcePermission  ResourcePermission[]
-  ResourceAttributePermission   ResourceAttributePermission[]
-
+  UserRoleMap                 UserRoleMap[]
+  ResourcePermission          ResourcePermission[]
+  ResourceAttributePermission ResourceAttributePermission[]
 }
 
 model Resource {
-  id      Int         @id @default(autoincrement())
-  name    String      @unique()
-  des     String?
-  createdAt            DateTime         @default(now())
-  updatedAt            DateTime         @default(now())
+  id        Int      @id @default(autoincrement())
+  name      String   @unique()
+  des       String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
 
-  ResourceAttribute   ResourceAttribute[]
-  ResourcePermission  ResourcePermission[]
+  ResourceAttribute  ResourceAttribute[]
+  ResourcePermission ResourcePermission[]
 }
 
 model ResourceAttribute {
-  id      Int         @id @default(autoincrement())
-  name    String
-  value   String
-  resourceId   Int
-  createdAt            DateTime         @default(now())
-  updatedAt            DateTime         @default(now())
+  id         Int      @id @default(autoincrement())
+  name       String
+  value      String
+  resourceId Int
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt()
 
-  ResourceAttributePermission   ResourceAttributePermission[]
-  Resource Resource @relation(fields: [resourceId], references: [id])
-  
+  ResourceAttributePermission ResourceAttributePermission[]
+  Resource                    Resource                      @relation(fields: [resourceId], references: [id])
+
+  @@unique([resourceId, name, value])
   @@index([resourceId], name: "FK_RA_RESOURCE_ID_idx")
-  @@unique([resourceId,name,value])
 }
- model ResourcePermission {
-  id      Int         @id @default(autoincrement())
-  roleId  Int        
-  resourceId  Int
-  action      Int
-  createdAt            DateTime         @default(now())
-  updatedAt            DateTime         @default(now())
 
-  Resource Resource @relation(fields: [resourceId], references: [id])
-  Role RoleMaster @relation(fields: [roleId], references: [id])
+model ResourcePermission {
+  id         Int      @id @default(autoincrement())
+  roleId     Int
+  resourceId Int
+  action     Int
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt()
+
+  Resource Resource   @relation(fields: [resourceId], references: [id])
+  Role     RoleMaster @relation(fields: [roleId], references: [id])
 
   @@index([resourceId], name: "FK_RP_RESOURCE_ID_idx")
 }
 
 model ResourceAttributePermission {
-  id      Int         @id @default(autoincrement())
-  roleId    Int
-  resourceAttributeId  Int
-  action      Int
-  createdAt            DateTime         @default(now())
-  updatedAt            DateTime         @default(now())
+  id                  Int      @id @default(autoincrement())
+  roleId              Int
+  resourceAttributeId Int
+  action              Int
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt()
 
-  Role RoleMaster @relation(fields: [roleId], references: [id])
-  ResourceAttribute   ResourceAttribute @relation(fields: [resourceAttributeId], references: [id])
+  Role              RoleMaster        @relation(fields: [roleId], references: [id])
+  ResourceAttribute ResourceAttribute @relation(fields: [resourceAttributeId], references: [id])
 
-  @@index([resourceAttributeId], name : "FK_RAP_RESOURCE_ATTRIBUTE_ID_idx")
+  @@index([resourceAttributeId], name: "FK_RAP_RESOURCE_ATTRIBUTE_ID_idx")
 }
 
-
 model UserRoleMap {
-  id      Int       @id @default(autoincrement())
-  userId         String   @unique
-  roleId         Int
-  createdAt      DateTime       @default(now())
-
+  id        Int      @id @default(autoincrement())
+  userId    String   @unique
+  roleId    Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
 
   Role RoleMaster @relation(fields: [roleId], references: [id])
-  User           User           @relation(fields: [userId], references: [id])
-
+  User User       @relation(fields: [userId], references: [id])
 
   @@unique([userId, roleId], name: "UNIQUE_USER_ROLE_ID")
   @@index([roleId], name: "FK_ROLE_MAP_ROLE_ID_idx")
