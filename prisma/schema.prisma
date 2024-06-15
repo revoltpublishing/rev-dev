@@ -149,7 +149,6 @@ model BookDraftPageCharacter {
   createdAt           DateTime              @default(now())
   updatedAt           DateTime              @default(now())
 
-  BookDraftCharacterStageChanges BookDraftCharacterStageChanges[]
 
   Book         Book       @relation(fields: [bookId], references: [id])
   prevChar  BookDraftPageCharacter? @relation("PREV_CHAR_BK_CHR_ID",fields: [prevId],references: [id])
@@ -158,20 +157,6 @@ model BookDraftPageCharacter {
   @@index([bookId,pageNo])
 }
 
-model BookDraftCharacterStageChanges {
-  id      String    @id @default(uuid())
-  bookDraftPageCharacterId    String    
-  stageId   Int
-  operation Int
-  pos       Int
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @default(now())
-
-  BookDraftPageCharacter BookDraftPageCharacter @relation(fields: [bookDraftPageCharacterId],references: [id])
-  
-  @@index([bookDraftPageCharacterId])
-
-}
 
 
 // *****************************  ACL TABLES STARTED ****************************************
