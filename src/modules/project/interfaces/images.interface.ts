@@ -1,6 +1,5 @@
 export interface uploadBookStageImageI {
-  bookId: string;
-  stageId: number;
+  bkStgId: string;
   uploadedBy: string;
   name: string;
   s3Path: string;

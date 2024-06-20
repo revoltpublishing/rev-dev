@@ -8,4 +8,5 @@ export const createUserReqSchema = Joi.object({
   mobileRegion: Joi.string().required(),
   role: Joi.string().required(),
   bookId: Joi.string(),
+  createdBy: Joi.string(),
 });

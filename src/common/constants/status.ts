@@ -28,27 +28,29 @@ export class StatusCodes {
   );
 }
 export class DbStatusCodes {
+  public static readonly MOBILE_ALREADY_OCCUPIED = {
+    message: "mobile should be unique",
+    status: HttpStatus.NOT_ACCEPTABLE,
+  };
+  public static readonly ERROR_IN_SAVING_DETAILS = {
+    message: "error in saving details",
+    status: HttpStatus.BAD_REQUEST,
+  };
+  public static readonly ROLE_DOESNOT_EXISTS = {
+    message: "role doesn't exist",
+    status: HttpStatus.NOT_FOUND,
+  };
+}
+export class DbExecptions {
+  public static readonly ROLE_DOESNOT_EXISTS = new HttpException(
+    "role doesn't exists",
+    HttpStatus.NOT_FOUND
+  );
   public static readonly DUPLICATED_FIELD = (str: string) =>
     new HttpException(
       `${str} field value already exists.`,
       HttpStatus.NOT_ACCEPTABLE
     );
-  public static readonly EMAIL_ALREADY_OCCUPIED = new HttpException(
-    "email should be unique",
-    HttpStatus.NOT_ACCEPTABLE
-  );
-  public static readonly MOBILE_ALREADY_OCCUPIED = new HttpException(
-    "mobile should be unique",
-    HttpStatus.NOT_ACCEPTABLE
-  );
-  public static readonly ERROR_IN_SAVING_DETAILS = new HttpException(
-    "error in saving details",
-    HttpStatus.BAD_REQUEST
-  );
-  public static readonly ROLE_DOESNOT_EXISTS = new HttpException(
-    "role doesn't exists",
-    HttpStatus.NOT_FOUND
-  );
 }
 
 export class DynamicStatusCodes {

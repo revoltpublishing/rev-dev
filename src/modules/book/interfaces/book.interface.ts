@@ -3,13 +3,16 @@ import { Prisma } from "@prisma/client";
 export interface bookI {
   title: string;
   description: string;
-  bookUsers: string[];
-  stage: string;
   createdBy: string;
-  stageId: number;
   draftImageId: string;
 }
-
+export interface createBookI extends createBookReqI, Prisma.BookCreateInput {}
+export interface createBookReqI extends bookI {
+  bookUsers: string[];
+}
+export interface buildCreateBookObjectI extends createBookReqI {
+  initBkStg: boolean;
+}
 export interface uploadImageI {
   id?: string;
   title: string;
@@ -34,6 +37,9 @@ export interface filterBookI {
   offset: number;
   pg: number;
 }
+export interface buildFilterBookI
+  extends Prisma.BookFindManyArgs,
+    filterBookI {}
 
 export type getManyResponse = Prisma.BookUserMapGetPayload<{
   include: {
@@ -58,8 +64,7 @@ export interface addBookStageReqI {
   requirements: string;
 }
 export interface updateBookStageI {
-  bookId: string;
-  stageId: number;
+  id: string;
   isActive?: boolean;
   isAccepted?: boolean;
   isWorking?: boolean;

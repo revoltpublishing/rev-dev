@@ -4,67 +4,24 @@ import {
   addBookStageI,
   bookI,
   bookUserI,
+  createBookI,
   filterBookI,
   updateBookStageI,
 } from "../interfaces/book.interface";
 import { Prisma } from "@prisma/client";
 import { prismaErrorMapper } from "src/common/mappers/prisma";
+import { BOOK_STAGE_TREE } from "../constants/stage";
 
 @Injectable()
 export class BooksRepository {
   constructor(private readonly dbClient: DbClient) {}
-  buildFilterObject(params: filterBookI): Prisma.BookFindManyArgs {
-    const obj: Prisma.BookFindManyArgs = {
-      where: {},
-      include: {
-        BookUserMap: {
-          include: {
-            User: {
-              include: { UserRoleMap: true, ProfileImage: true },
-            },
-          },
-        },
-        BookStage: {},
-      },
-    };
-    if (params.pg) obj.skip = params.pg && params.pg == 1 ? 0 : params.pg * 10;
-    if (params.offset)
-      obj.take = params.offset !== undefined ? params.offset : null;
-    if (params.search) {
-      obj.where = {
-        title: {
-          startsWith: params.search,
-        },
-        BookStage: {},
-      };
-    }
-    if (params.stage)
-      obj.where = {
-        ...obj.where,
-        BookStage: {
-          some: {
-            stageId: params.stageId,
-          },
-        },
-      };
-    return obj;
-  }
 
-  async createBook(params: bookI) {
-    const { bookUsers, ...rest } = params;
+  async createBook(params: createBookI) {
+    const { bookUsers, createdBy, draftImageId, ...rest } = params;
     try {
       return await this.dbClient.book.create({
         data: {
           ...rest,
-          BookUserMap: {
-            createMany: {
-              data: [
-                ...params.bookUsers.map((v) => ({
-                  userId: v,
-                })),
-              ],
-            },
-          },
         },
       });
     } catch (e) {
@@ -77,14 +34,12 @@ export class BooksRepository {
     });
   }
 
-  async getBooks(params: filterBookI) {
-    return await this.dbClient.book.findMany(this.buildFilterObject(params));
+  async getBooks(params: Prisma.BookFindManyArgs) {
+    return await this.dbClient.book.findMany(params);
   }
-  async getBooksCount(params: filterBookI) {
-    params.offset = undefined;
-    params.pg = undefined;
+  async getBooksCount(params: Prisma.BookFindManyArgs) {
     const res = await this.dbClient.book.findMany({
-      ...this.buildFilterObject(params),
+      ...params,
     });
     return res.length;
   }
@@ -94,17 +49,17 @@ export class BooksRepository {
     });
   }
   async updateBookStage(params: updateBookStageI) {
-    const { bookId, stageId, ...rest } = params;
+    const { id, ...rest } = params;
     return this.dbClient.bookStage.update({
       where: {
-        bookId_stageId: { bookId, stageId },
+        id,
       },
       data: { ...rest },
     });
   }
-  async getBookStage(params: { bookId: string; stageId: number }) {
+  async getBookStageById(params: { id: string }) {
     return await this.dbClient.bookStage.findFirst({
-      where: { bookId: params.bookId, stageId: params.stageId },
+      where: { id: params.id },
       include: {
         BookStageImageMap: {
           include: { Image: {} },

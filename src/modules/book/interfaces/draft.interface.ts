@@ -4,3 +4,9 @@ export interface addBookDraftPageCharacterI {
   character: string;
   prevId: string | null;
 }
+
+export interface addBookDraftPageI {
+  page: number;
+  content: string;
+  bkStgManuId: string;
+}

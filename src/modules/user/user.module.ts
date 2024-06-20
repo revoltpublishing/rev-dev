@@ -1,4 +1,4 @@
-import { Module } from "@nestjs/common";
+import { Logger, Module } from "@nestjs/common";
 import { AuthService } from "./repositories/auth.repository";
 import { AcessControlRepository } from "./repositories/acess-control.repository";
 import { DbClient } from "src/common/services/dbclient.service";
@@ -25,6 +25,7 @@ import { AccessMiddleware } from "src/common/middlewares/userinfo.middleware";
     ProjectModule,
     ImagesRepository,
     UserService,
+    Logger,
   ],
   imports: [ProjectModule, BookModule],
   exports: [AuthService, AcessControlRepository],

@@ -52,10 +52,19 @@ export class ImagesRepository {
         mimeType: params.mimeType,
         BookStageImageMap: {
           create: {
-            bookId: params.bookId,
-            stageId: params.stageId,
+            bkStgId: params.bkStgId,
           },
         },
+      },
+    });
+  }
+  async getBookStageImages(params: { bkStgId: string }) {
+    return this.dbClient.bookStageImageMap.findMany({
+      where: {
+        bkStgId: params.bkStgId,
+      },
+      include: {
+        Image: {},
       },
     });
   }

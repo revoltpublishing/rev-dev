@@ -15,13 +15,13 @@ export class UserService {
     const img = await this.imagesRepo.getImageById({
       id: user.profileImageId,
     });
+    if (img == null) return user;
     const s3Path = img.s3Path;
     const mimeType = img.mimeType;
     const signedURL = await this.s3Service.getPresignedURL({
       path: s3Path,
       mimeType,
     });
-    const temp = { ...user, signedURL };
-    return temp;
+    return { ...user, signedURL };
   }
 }

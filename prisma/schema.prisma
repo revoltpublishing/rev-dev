@@ -36,6 +36,8 @@ model User {
   ProfileImage            Image?                    @relation(name: "FK_PROFILE_IMAGE_ID", fields: [profileImageId], references: [id])
   BookStageManuscriptPage BookStageManuscriptPage[]
   Role                    RoleMaster                @relation(fields: [roleId], references: [id])
+  CreatedByUser           User?                     @relation(fields: [createdBy], references: [id], name: "FK_CREATED_BY_USER_SELF")
+  OtherCreatedByUser      User[]                    @relation(name: "FK_CREATED_BY_USER_SELF")
 
   @@index([createdAt])
   @@index([accessToken])
@@ -49,7 +51,7 @@ model Image {
   uploadedBy String
   isActive   Int      @default(1)
   createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt()
+  updatedAt  DateTime @updatedAt
   User       User     @relation(name: "FK_USER_IMAGE_ID", fields: [uploadedBy], references: [id])
 
   UserImageMap      UserImageMap[]
@@ -67,7 +69,7 @@ model UserImageMap {
   imageId   String
   isActive  Int
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt()
+  updatedAt DateTime @updatedAt
 
   User  User  @relation(fields: [userId], references: [id])
   Image Image @relation(fields: [imageId], references: [id])
@@ -80,7 +82,7 @@ model Book {
   draftImageId String   @unique()
   createdBy    String
   createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt()
+  updatedAt    DateTime @updatedAt
 
   BookStage         BookStage[]
   BookUserMap       BookUserMap[]
@@ -95,7 +97,7 @@ model BookUserMap {
   bookId    String
   userId    String
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt()
+  updatedAt DateTime @updatedAt
 
   User User @relation(fields: [userId], references: [id])
   Book Book @relation(fields: [bookId], references: [id])
@@ -109,20 +111,20 @@ model BookStage {
   bookId       String
   stageId      Int
   isAccepted   Boolean  @default(false) // when stage has been submitted and reviewed by author
-  isActive     Boolean  @default(true) // when stage is applied 
-  isWorking    Boolean  @default(false) // work on stage is in progress
+  isActive     Boolean  @default(false) // when stage is applied 
+  isEditing    Boolean  @default(false) // work on stage is in progress
   isCompleted  Boolean  @default(false) // is stage completed by concerned party
-  isSubmitted  Boolean  @default(false) // is stage submitted by concerned party
-  requirements String
+  requirements String?
   createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt()
+  updatedAt    DateTime @updatedAt
 
   BookStageImageMap BookStageImageMap[]
 
   Book                Book                  @relation(fields: [bookId], references: [id])
   BookStageManuscript BookStageManuscript[]
 
-  @@index([bookId], name: "FK_BOOK_ID_STAGE_idx")
+  @@unique([bookId, stageId])
+  @@index([bookId, stageId], name: "FK_BOOK_ID_STAGE_idx")
 }
 
 model BookStageImageMap {
@@ -130,7 +132,7 @@ model BookStageImageMap {
   bkStgId   String
   imageId   String
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt()
+  updatedAt DateTime @updatedAt
 
   Image     Image     @relation(fields: [imageId], references: [id])
   BookStage BookStage @relation(fields: [bkStgId], references: [id])
@@ -143,12 +145,11 @@ model BookStageManuscript {
   bkStgId     String
   name        String
   parentId    String?
-  isWorking   Boolean  @default(false)
   isSubmitted Boolean  @default(false)
-  isAccepted  Boolean  @default(false)
+  iSAccepted  Boolean  @default(false)
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt()
+  updatedAt   DateTime @updatedAt
 
   BookStage               BookStage                 @relation(fields: [bkStgId], references: [id])
   parentManuscriptId      BookStageManuscript?      @relation("PREV_MANUSCRPT_BK_ID", fields: [parentId], references: [id])
@@ -165,12 +166,13 @@ model BookStageManuscriptPage {
   bkStgManuId String
 
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt()
+  updatedAt DateTime @updatedAt
   updatedBy String?
 
   BookStageManuscript         BookStageManuscript @relation(references: [id], fields: [bkStgManuId])
   BookStageManucriptUpdatedBy User?               @relation(fields: [updatedBy], references: [id])
 
+  @@unique([page, bkStgManuId])
   @@index([bkStgManuId, page])
 }
 
@@ -180,12 +182,10 @@ model RoleMaster {
   id        Int      @id
   role      String   @unique
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt()
 
   User                        User[]
   ResourcePermission          ResourcePermission[]
   ResourceAttributePermission ResourceAttributePermission[]
-  userId                      String
 }
 
 model Resource {
@@ -193,7 +193,7 @@ model Resource {
   name      String   @unique()
   des       String?
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt()
+  updatedAt DateTime @updatedAt
 
   ResourceAttribute  ResourceAttribute[]
   ResourcePermission ResourcePermission[]
@@ -205,7 +205,7 @@ model ResourceAttribute {
   value      String
   resourceId Int
   createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt()
+  updatedAt  DateTime @updatedAt
 
   ResourceAttributePermission ResourceAttributePermission[]
   Resource                    Resource                      @relation(fields: [resourceId], references: [id])
@@ -220,7 +220,7 @@ model ResourcePermission {
   resourceId Int
   action     Int
   createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt()
+  updatedAt  DateTime @updatedAt
 
   Resource Resource   @relation(fields: [resourceId], references: [id])
   Role     RoleMaster @relation(fields: [roleId], references: [id])
@@ -234,7 +234,7 @@ model ResourceAttributePermission {
   resourceAttributeId Int
   action              Int
   createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt()
+  updatedAt           DateTime @updatedAt
 
   Role              RoleMaster        @relation(fields: [roleId], references: [id])
   ResourceAttribute ResourceAttribute @relation(fields: [resourceAttributeId], references: [id])

@@ -8,6 +8,7 @@ export interface UserI {
   roleId: number;
   bookId?: string;
   s3Url?: string;
+  createdBy?: string;
 }
 
 export interface createUserI {
