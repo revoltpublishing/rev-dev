@@ -42,10 +42,8 @@ export class DbStatusCodes {
   };
 }
 export class DbExecptions {
-  public static readonly ROLE_DOESNOT_EXISTS = new HttpException(
-    "role doesn't exists",
-    HttpStatus.NOT_FOUND
-  );
+  public static readonly DOESNOT_EXISTS = (str: string) =>
+    new HttpException(`${str} doesn't exists`, HttpStatus.EXPECTATION_FAILED);
   public static readonly DUPLICATED_FIELD = (str: string) =>
     new HttpException(
       `${str} field value already exists.`,

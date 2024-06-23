@@ -34,7 +34,7 @@ export class UserController {
     const roleD = await this.accessControlRepo.getRoleByRole({ role });
     const password = generateRandomPassword();
     if (!roleD) {
-      throw DbExecptions.ROLE_DOESNOT_EXISTS;
+      throw DbExecptions.DOESNOT_EXISTS("role");
     }
     const ud = await this.usersRepo.createUser({
       ...rest,

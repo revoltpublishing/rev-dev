@@ -191,7 +191,6 @@ model RoleMaster {
 model Resource {
   id        Int      @id @default(autoincrement())
   name      String   @unique()
-  des       String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -203,6 +202,7 @@ model ResourceAttribute {
   id         Int      @id @default(autoincrement())
   name       String
   value      String
+  type       String
   resourceId Int
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt

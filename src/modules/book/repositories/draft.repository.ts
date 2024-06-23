@@ -48,9 +48,9 @@ export class DraftRepository {
       data: params,
     });
   }
-  async getManuscriptPageById(params: { id: string; page: number }) {
+  async getManuscriptPage(params: { bkStgManuId: string; page: number }) {
     return this.dbClient.bookStageManuscriptPage.findFirst({
-      where: { bkStgManuId: params.id, page: params.page },
+      where: { bkStgManuId: params.bkStgManuId, page: params.page },
     });
   }
   async getBookStageManucriptById(params: { id: string }) {
@@ -64,9 +64,11 @@ export class DraftRepository {
       where: params,
     });
   }
-  async deleteBookManuscriptPage(params: { bkManuId: string; pg: number }) {
+  async deleteBookManuscriptPage(params: { bkManuId: string; page: number }) {
     return this.dbClient.bookStageManuscriptPage.delete({
-      where: { id: params.bkManuId, page: params.pg },
+      where: {
+        page_bkStgManuId: { bkStgManuId: params.bkManuId, page: params.page },
+      },
     });
   }
 }

@@ -8,7 +8,6 @@ import { ConfigService } from "@nestjs/config";
 import { DraftRepository } from "../repositories/draft.repository";
 import { BOOK_STAGE_TREE } from "../constants/stage";
 import { DbExecptions } from "src/common/constants/status";
-import { Prisma } from "@prisma/client";
 import { addBookDraftPageI } from "../interfaces/draft.interface";
 
 @Injectable()
@@ -55,7 +54,7 @@ export class DraftService {
     const payload = {
       bkStgId: bkStg.id,
       name: "Orignal Manuscript",
-      isSubmitted: true,
+      isSubmitted: body.parentBkManuId ? false : true,
       parentId: body.parentBkManuId ? body.parentBkManuId : null,
     };
     if (!body.parentBkManuId) {
@@ -114,11 +113,27 @@ export class DraftService {
   getBookStageId(params: { stage: string }) {
     const stgD = BOOK_STAGE_TREE.find((bk) => bk.stage === params.stage);
     if (!stgD) {
-      throw DbExecptions.ROLE_DOESNOT_EXISTS;
+      throw DbExecptions.DOESNOT_EXISTS("stage");
     }
     return stgD;
   }
-  // post api for bk mansc; if issubm then create new manu or else start editing in it.
-  // get api for manusc by id
-  // get api for bkid and stg with all manu attched nd
+  async getRecursPageManuscript(body: { mid: string; page: number }) {
+    const pgD = await this.draftRepo.getManuscriptPage({
+      page: Number(body.page),
+      bkStgManuId: body.mid,
+    });
+    if (pgD !== null) {
+      return pgD;
+    }
+    const msD = await this.draftRepo.getBookStageManucriptById({
+      id: body.mid,
+    });
+    return this.getRecursPageManuscript({
+      mid: msD.parentId,
+      page: body.page,
+    });
+  }
 }
+// post api for bk mansc; if issubm then create new manu or else start editing in it.
+// get api for manusc by id
+// get api for bkid and stg with all manu attched nd

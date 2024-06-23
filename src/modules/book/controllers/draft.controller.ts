@@ -44,12 +44,14 @@ export class DraftController {
     body: {
       bookId: string;
       stage: string;
+      parentId?: string;
     }
   ) {
     const stgD = this.draftService.getBookStageId({ stage: body.stage });
     return await this.draftService.prepareDraft({
       bookId: body.bookId,
       stageId: stgD.id,
+      parentBkManuId: body.parentId,
     });
   }
   @Put("/manuscript/:mid")
@@ -58,7 +60,7 @@ export class DraftController {
     params: { mid: string },
     @Body()
     body: {
-      pg: number;
+      page: number;
       content: string;
     }
   ) {
@@ -76,12 +78,18 @@ export class DraftController {
       });
       ms = await this.draftRepo.getBookStageManucriptById({ id: newMs.id });
     }
-    await this.draftRepo.deleteBookManuscriptPage({
-      bkManuId: ms.id,
-      pg: body.pg,
+    const pg = await this.draftRepo.getManuscriptPage({
+      bkStgManuId: ms.id,
+      page: body.page,
     });
-    const pgN = this.draftRepo.addBookStageManuscriptPage({
-      page: body.pg,
+    if (pg) {
+      await this.draftRepo.deleteBookManuscriptPage({
+        bkManuId: ms.id,
+        page: Number(body.page),
+      });
+    }
+    const pgN = await this.draftRepo.addBookStageManuscriptPage({
+      page: Number(body.page),
       content: body.content,
       bkStgManuId: ms.id,
     });
@@ -89,18 +97,12 @@ export class DraftController {
   }
   @Get("/manuscript/:mid/:page")
   async getManuscriptById(@Param() params: { mid: string; page: number }) {
-    let pg = await this.draftRepo.getManuscriptPageById({
-      id: params.mid,
-      page: params.page,
+    let pg = await this.draftRepo.getManuscriptPage({
+      bkStgManuId: params.mid,
+      page: Number(params.page),
     });
     if (!pg) {
-      const ms = await this.draftRepo.getBookStageManucriptById({
-        id: params.mid,
-      });
-      pg = await this.draftRepo.getManuscriptPageById({
-        page: params.page,
-        id: ms.parentId,
-      });
+      pg = await this.draftService.getRecursPageManuscript(params);
     }
     return pg;
   }
