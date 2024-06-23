@@ -3,12 +3,10 @@ import { Body, Controller, Get, Param, Post, Req } from "@nestjs/common";
 import { S3Service } from "src/common/services/s3.service";
 import { ProjectPaths } from "src/common/constants/paths";
 import { uploadImageI } from "src/modules/book/interfaces/book.interface";
-import { uploadImageI } from "src/modules/book/interfaces/book.interface";
 
 @Controller("images")
 export class ImageController {
   constructor(
-    private readonly imagesRepo: ImagesRepository,
     private readonly imagesRepo: ImagesRepository,
     private readonly s3Service: S3Service
   ) {}

@@ -1,9 +1,6 @@
 import { Prisma } from "@prisma/client";
 
 export interface bookI {
-import { Prisma } from "@prisma/client";
-
-export interface bookI {
   title: string;
   description: string;
   createdBy: string;
