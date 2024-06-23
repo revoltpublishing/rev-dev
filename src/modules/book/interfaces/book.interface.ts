@@ -1,6 +1,9 @@
 import { Prisma } from "@prisma/client";
 
 export interface bookI {
+import { Prisma } from "@prisma/client";
+
+export interface bookI {
   title: string;
   description: string;
   createdBy: string;
@@ -17,6 +20,16 @@ export interface uploadImageI {
   id?: string;
   title: string;
   uploadedBy: string;
+  s3Path: string;
+  mimeType: string;
+}
+export interface uploadImageParamsI {
+  id: string;
+}
+
+export interface uploadImageReqI {
+  id: string;
+  title: string;
   s3Path: string;
   mimeType: string;
 }
