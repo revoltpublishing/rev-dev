@@ -11,10 +11,11 @@ export class UserService {
   ) {}
 
   async getUserWithImage(user: User) {
-    if (user.profileImageId === undefined) return user;
+    if (user.profileImageId === null) return user;
     const img = await this.imagesRepo.getImageById({
       id: user.profileImageId,
     });
+    if (img == null) return user;
     const s3Path = img.s3Path;
     const mimeType = img.mimeType;
     const signedURL = await this.s3Service.getPresignedURL({

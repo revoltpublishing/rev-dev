@@ -13,7 +13,7 @@ import { PayloadValidationPipe } from "src/common/pipes/payload.pipe";
 import { createUserReqSchema } from "../validationSchema/user";
 import { generateRandomPassword } from "src/common/helpers/generatePassword";
 import { BooksRepository } from "src/modules/book/repositories/book.repository";
-import { MessageError } from "src/common/constants/status";
+import { DbExecptions, MessageError } from "src/common/constants/status";
 import { AcessControlRepository } from "../repositories/acess-control.repository";
 import { UserService } from "../services/user.service";
 import { User } from "@prisma/client";
@@ -31,12 +31,15 @@ export class UserController {
   @UsePipes(new PayloadValidationPipe(createUserReqSchema))
   async add(@Body() body: createUserI) {
     const { role, ...rest } = body;
-    const roleId = (await this.accessControlRepo.getRoleByRole({ role })).id;
+    const roleD = await this.accessControlRepo.getRoleByRole({ role });
     const password = generateRandomPassword();
+    if (!roleD) {
+      throw DbExecptions.DOESNOT_EXISTS("role");
+    }
     const ud = await this.usersRepo.createUser({
       ...rest,
       password,
-      roleId,
+      roleId: roleD.id,
     });
     if (body.bookId && typeof ud !== "string") {
       this.booksRepo.addUserToBook({

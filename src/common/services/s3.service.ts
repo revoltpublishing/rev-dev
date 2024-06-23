@@ -54,7 +54,7 @@ export class S3Service {
   async uploadBlobToS3(
     s3Path: string,
     blob: ArrayBuffer,
-    bucket = "better-homez-images"
+    bucket = this.configService.get("AWS_S3_BUCKET_NAME")
   ) {
     await this.s3.upload({
       ACL: "public-read",

@@ -12,6 +12,7 @@ export interface resourcePermissionI {
 export interface resourceAttributeI {
   name: string;
   value: string;
+  type: string;
   resourceId: number;
   permission: resourceAttributePermissionI[];
 }

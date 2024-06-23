@@ -21,7 +21,6 @@ export class AcessControlRepository {
     return this.dbClient.resource.create({
       data: {
         name,
-        des,
         ResourcePermission: {
           createMany: {
             data: rest.permission,

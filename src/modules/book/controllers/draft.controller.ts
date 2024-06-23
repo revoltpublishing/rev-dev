@@ -1,8 +1,5 @@
-import {
-  uploadImageI,
-  uploadImageParamsI,
-} from "src/modules/book/interfaces/book.interface";
-import { Body, Controller, Get, Param, Post, Req } from "@nestjs/common";
+import { uploadImageI } from "src/modules/book/interfaces/book.interface";
+import { Body, Controller, Get, Param, Post, Put, Req } from "@nestjs/common";
 import { ProjectPaths } from "src/common/constants/paths";
 import { ImageFormats } from "../constants/formats";
 import { DynamicStatusCodes } from "src/common/constants/status";
@@ -23,8 +20,7 @@ export class DraftController {
     req: Request
   ) {
     const uploadedBy = req["context"]["userDetails"]?.id;
-    const { title } = body;
-    const { mimeType } = body;
+    const { title, mimeType } = body;
     if (!ImageFormats.DRAFT_ACCEPTED_FORMATS.includes(mimeType))
       throw DynamicStatusCodes.INVAID_DOCUMENT_FORMAT(
         ImageFormats.DRAFT_ACCEPTED_FORMATS.join(",")
@@ -42,20 +38,72 @@ export class DraftController {
     });
     return { signedURL, id: doc.id };
   }
-  @Get("/:id/prepare")
+  @Post("/prepare")
   async prepareDraft(
-    @Param()
-    params: uploadImageParamsI
+    @Body()
+    body: {
+      bookId: string;
+      stage: string;
+      parentId?: string;
+    }
   ) {
-    return await this.draftService.prepareDraft({ bookId: params.id });
-  }
-  @Get("/:id/pages/:pageNo")
-  async getDraftCharacterByPage(
-    @Param() params: { id: string; pageNo: number }
-  ) {
-    return this.draftRepo.getDraftCharactersByPage({
-      bookId: params.id,
-      pageNo: Number(params.pageNo),
+    const stgD = this.draftService.getBookStageId({ stage: body.stage });
+    return await this.draftService.prepareDraft({
+      bookId: body.bookId,
+      stageId: stgD.id,
+      parentBkManuId: body.parentId,
     });
+  }
+  @Put("/manuscript/:mid")
+  async updateManuscript(
+    @Param()
+    params: { mid: string },
+    @Body()
+    body: {
+      page: number;
+      content: string;
+    }
+  ) {
+    let ms = await this.draftRepo.getBookStageManucriptById({
+      id: params.mid,
+    });
+    if (ms.isSubmitted) {
+      const bkMans = this.draftRepo.getBookManuscriptsyBkStgId({
+        bkStgId: ms.BookStage.id,
+      });
+      const newMs = await this.draftRepo.addBookManuscript({
+        bkStgId: ms.BookStage.id,
+        parentId: ms.id,
+        name: `Revised Draft ${(await bkMans).length}`,
+      });
+      ms = await this.draftRepo.getBookStageManucriptById({ id: newMs.id });
+    }
+    const pg = await this.draftRepo.getManuscriptPage({
+      bkStgManuId: ms.id,
+      page: body.page,
+    });
+    if (pg) {
+      await this.draftRepo.deleteBookManuscriptPage({
+        bkManuId: ms.id,
+        page: Number(body.page),
+      });
+    }
+    const pgN = await this.draftRepo.addBookStageManuscriptPage({
+      page: Number(body.page),
+      content: body.content,
+      bkStgManuId: ms.id,
+    });
+    return { page: pgN, manuscript: ms };
+  }
+  @Get("/manuscript/:mid/:page")
+  async getManuscriptById(@Param() params: { mid: string; page: number }) {
+    let pg = await this.draftRepo.getManuscriptPage({
+      bkStgManuId: params.mid,
+      page: Number(params.page),
+    });
+    if (!pg) {
+      pg = await this.draftService.getRecursPageManuscript(params);
+    }
+    return pg;
   }
 }

@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, Logger } from "@nestjs/common";
 import { filterUserI, UserI } from "../interfaces/user.interface";
 import { DbClient } from "src/common/services/dbclient.service";
 import { prismaErrorMapper } from "src/common/mappers/prisma";
@@ -6,11 +6,6 @@ import { Prisma } from "@prisma/client";
 
 export const userIncludeObject: Prisma.UserInclude = {
   ProfileImage: true,
-  UserRoleMap: {
-    include: {
-      Role: {},
-    },
-  },
   BookUserMap: {
     include: {
       Book: {},
@@ -23,10 +18,12 @@ export const userIncludeObject: Prisma.UserInclude = {
   },
 };
 export const userSelectObject: Prisma.UserSelect = {
+  id: true,
   firstName: true,
   lastName: true,
   email: true,
   mobile: true,
+  accessToken: true,
   ...userIncludeObject,
 };
 
@@ -39,21 +36,19 @@ function firstUpperCase(s: string) {
 
 @Injectable()
 export class UsersRepository {
-  constructor(private readonly dbClient: DbClient) {}
+  constructor(
+    private readonly dbClient: DbClient,
+    private readonly logger: Logger
+  ) {}
   async createUser(params: UserI) {
-    const { roleId, ...rest } = params;
     try {
       return await this.dbClient.user.create({
         data: {
-          ...rest,
-          UserRoleMap: {
-            create: {
-              roleId,
-            },
-          },
+          ...params,
         },
       });
     } catch (e) {
+      this.logger.error(e);
       return prismaErrorMapper(e);
     }
   }
@@ -91,8 +86,7 @@ export class UsersRepository {
         },
       ];
     }
-    if (params.roleId)
-      obj.where = { ...obj.where, UserRoleMap: { roleId: params.roleId } };
+    if (params.roleId) obj.where = { ...obj.where, roleId: params.roleId };
     return obj;
   }
   async getUsers(params: filterUserI) {

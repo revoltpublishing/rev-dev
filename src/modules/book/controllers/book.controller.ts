@@ -2,7 +2,7 @@ import { Body, Controller, Get, Param, Post, Put, Req } from "@nestjs/common";
 import { BooksRepository } from "../repositories/book.repository";
 import {
   addBookStageReqI,
-  bookI,
+  createBookI,
   filterBookI,
   updateBookStageI,
 } from "../interfaces/book.interface";
@@ -16,17 +16,20 @@ export class BookController {
   constructor(
     private readonly booksRepo: BooksRepository,
     private readonly usersService: UserService,
-    private readonly booksSerivce: BooksService
+    private readonly booksService: BooksService
   ) {}
   @Post("/add")
-  addBook(@Body() body: bookI, @Req() req: Request) {
+  addBook(@Body() body: createBookI, @Req() req: Request) {
     const { userDetails } = req["context"];
-    return this.booksRepo.createBook({ ...body, createdBy: userDetails.id });
+    return this.booksService.createBookWithInitStages({
+      ...body,
+      createdBy: userDetails.id,
+    });
   }
   @Post("/lookup")
   async list(@Body() body: filterBookI) {
-    const list = await this.booksRepo.getBooks({ ...body });
-    const count = await this.booksRepo.getBooksCount({ ...body });
+    const list = await this.booksService.getFilteredBooks({ ...body });
+    const count = await this.booksService.getFilteredBooksCount({ ...body });
     const listRes = await Promise.all(
       list.map(async (ls) => {
         const ud = ls["BookUserMap"];
@@ -40,10 +43,11 @@ export class BookController {
   }
   @Get("/:id")
   async getBookById(@Param() params: { id: string }) {
-    return await this.booksSerivce.getBookWithDraftImage(
+    return await this.booksService.getBookWithDraftImage(
       await this.booksRepo.getBookById({ id: params.id })
     );
   }
+  // changes for bk stage to book id and stage name
   @Post("/:id/stage/add")
   async addBookStage(@Param("id") id: string, @Body() body: addBookStageReqI) {
     const bkStgs = await this.booksRepo.getBookStages({ bookId: id });
@@ -58,15 +62,13 @@ export class BookController {
   }
   @Put("/:id/stage")
   updateBookStage(@Param("id") id: string, @Body() body: updateBookStageI) {
-    return this.booksRepo.updateBookStage({ ...body, bookId: id });
+    return this.booksRepo.updateBookStage({ ...body, id });
   }
-  @Get("/:id/stage/:stage")
-  getBookStageDetails(@Param() params: { id: string; stage: string }) {
-    const stgD = BOOK_STAGE_TREE.find((st) => st.stage === params.stage);
-    if (!stgD) throw StatusCodes.INVAID_GENERAL;
-    return this.booksRepo.getBookStage({ bookId: params.id, stageId: stgD.id });
+  @Get("/stage/:id")
+  async getBookStageDetails(@Param() params: { id: string }) {
+    const bk = await this.booksRepo.getBookStageById({ id: params.id });
   }
-  @Get("/:id/stage")
+  @Get("/:id/stage/all")
   getBookStages(@Param() params: { id: string }) {
     return this.booksRepo.getBookStages({ bookId: params.id });
   }
