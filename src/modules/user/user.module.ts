@@ -1,6 +1,6 @@
 import { Logger, Module } from "@nestjs/common";
 import { AuthService } from "./repositories/auth.repository";
-import { AcessControlRepository } from "./repositories/acess-control.repository";
+import { AccessControlRepository } from "./repositories/acess-control.repository";
 import { DbClient } from "src/common/services/dbclient.service";
 import { AccessControlController } from "./controllers/access-control.controller";
 import { UserController } from "./controllers/user.controller";
@@ -18,7 +18,7 @@ import { AccessMiddleware } from "src/common/middlewares/userinfo.middleware";
   providers: [
     AuthService,
     S3Service,
-    AcessControlRepository,
+    AccessControlRepository,
     UsersRepository,
     DbClient,
     BookModule,
@@ -28,6 +28,6 @@ import { AccessMiddleware } from "src/common/middlewares/userinfo.middleware";
     Logger,
   ],
   imports: [ProjectModule, BookModule],
-  exports: [AuthService, AcessControlRepository],
+  exports: [AuthService, AccessControlRepository],
 })
 export class UsersModule {}

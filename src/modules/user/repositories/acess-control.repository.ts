@@ -7,7 +7,7 @@ import {
 import { DbClient } from "src/common/services/dbclient.service";
 
 @Injectable()
-export class AcessControlRepository {
+export class AccessControlRepository {
   constructor(private readonly dbClient: DbClient) {}
   createRole(params: { role: string; id: number }) {
     return this.dbClient.roleMaster.create({
@@ -112,7 +112,18 @@ export class AcessControlRepository {
       },
     });
   }
-  getRoleByRole(params: { role: string }) {
+  getRoleInfoByRole(params: { role: string }) {
+    try {
+      return this.dbClient.roleMaster.findFirst({
+        where: {
+          ...params,
+        },
+      });
+    } catch (e) {
+      throw DbStatusCodes.ROLE_DOESNOT_EXISTS;
+    }
+  }
+  getRoleInfoById(params: { id: number }) {
     try {
       return this.dbClient.roleMaster.findFirst({
         where: {

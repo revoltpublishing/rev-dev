@@ -15,6 +15,11 @@ const USER_ROLE__PM = "PROJECT_MANAGER";
 const USER_ROLE__TS = "TYPE_SETTER";
 const USER_ROLE__VW = "VIEWER";
 
+export const GOD__VIEW_ROLES = [
+  USER_ROLE_CONSTANTS.USER_ROLE__AD,
+  USER_ROLE_CONSTANTS.USER_ROLE__S_AD,
+];
+
 export const USER_ROLE_ARR_MAP = [
   {
     label: USER_ROLE__S_AD,

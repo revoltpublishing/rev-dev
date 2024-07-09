@@ -176,6 +176,11 @@ model BookStageManuscriptPage {
   @@index([bkStgManuId, page])
 }
 
+// model BookStageActivity {
+//   id      String @id @default(uuid())
+//   bkStgId String
+// }
+
 // *****************************  ACL TABLES STARTED ****************************************
 
 model RoleMaster {

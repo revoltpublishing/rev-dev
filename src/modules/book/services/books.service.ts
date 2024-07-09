@@ -83,6 +83,16 @@ export class BooksService {
         BookStage: {},
       };
     }
+    if (params.userId) {
+      obj.where = {
+        ...obj.where,
+        BookUserMap: {
+          some: {
+            userId: params.userId,
+          },
+        },
+      };
+    }
     if (params.stage)
       obj.where = {
         ...obj.where,
