@@ -10,6 +10,9 @@ import { UserService } from "src/modules/user/services/user.service";
 import { BOOK_STAGE_TREE } from "../constants/stage";
 import { StatusCodes } from "src/common/constants/status";
 import { BooksService } from "../services/books.service";
+import { AccessControlRepository } from "src/modules/user/repositories/acess-control.repository";
+import { UsersRepository } from "src/modules/user/repositories/user.repository";
+import { GOD__VIEW_ROLES } from "src/modules/user/constants/roles";
 
 @Controller("books")
 export class BookController {
@@ -26,8 +29,14 @@ export class BookController {
       createdBy: userDetails.id,
     });
   }
+
+  // filtering based on role required
   @Post("/lookup")
-  async list(@Body() body: filterBookI) {
+  async list(@Body() body: filterBookI, @Req() req: Request) {
+    const { userDetails } = req["context"];
+    if (!GOD__VIEW_ROLES.includes(userDetails.roleId)) {
+      body.userId = userDetails.id;
+    }
     const list = await this.booksService.getFilteredBooks({ ...body });
     const count = await this.booksService.getFilteredBooksCount({ ...body });
     const listRes = await Promise.all(
@@ -41,6 +50,7 @@ export class BookController {
     );
     return { count, list: listRes };
   }
+
   @Get("/:id")
   async getBookById(@Param() params: { id: string }) {
     return await this.booksService.getBookWithDraftImage(

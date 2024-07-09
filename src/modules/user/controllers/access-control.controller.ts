@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Post, Req } from "@nestjs/common";
-import { AcessControlRepository } from "../repositories/acess-control.repository";
+import { AccessControlRepository } from "../repositories/acess-control.repository";
 import {
   createResourceParamsI,
   resourceAttributeI,
@@ -7,7 +7,7 @@ import {
 
 @Controller("access-control")
 export class AccessControlController {
-  constructor(private readonly accessControlRepo: AcessControlRepository) {}
+  constructor(private readonly accessControlRepo: AccessControlRepository) {}
 
   @Get("/ping")
   async ping() {

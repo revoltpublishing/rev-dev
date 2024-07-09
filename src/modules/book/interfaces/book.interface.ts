@@ -46,6 +46,7 @@ export interface filterBookI {
   stage: string;
   offset: number;
   pg: number;
+  userId: string;
 }
 export interface buildFilterBookI
   extends Prisma.BookFindManyArgs,

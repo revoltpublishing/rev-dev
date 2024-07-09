@@ -2,13 +2,13 @@ import { Injectable, NestMiddleware } from "@nestjs/common";
 import { AuthService } from "src/modules/user/repositories/auth.repository";
 import { StatusCodes } from "../constants/status";
 import { ACTION_TYPES } from "../constants/action";
-import { AcessControlRepository } from "src/modules/user/repositories/acess-control.repository";
+import { AccessControlRepository } from "src/modules/user/repositories/acess-control.repository";
 
 @Injectable()
 export class AccessMiddleware implements NestMiddleware {
   constructor(
     private readonly authService: AuthService,
-    private readonly accessControlRepo: AcessControlRepository
+    private readonly accessControlRepo: AccessControlRepository
   ) {}
   async use(req: Request, res: Response, next: () => void) {
     const accessToken: string = req.headers["authorization"] as string;

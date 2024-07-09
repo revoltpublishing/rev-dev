@@ -14,7 +14,7 @@ import { createUserReqSchema } from "../validationSchema/user";
 import { generateRandomPassword } from "src/common/helpers/generatePassword";
 import { BooksRepository } from "src/modules/book/repositories/book.repository";
 import { DbExecptions, MessageError } from "src/common/constants/status";
-import { AcessControlRepository } from "../repositories/acess-control.repository";
+import { AccessControlRepository } from "../repositories/acess-control.repository";
 import { UserService } from "../services/user.service";
 import { User } from "@prisma/client";
 
@@ -23,7 +23,7 @@ export class UserController {
   constructor(
     private readonly usersRepo: UsersRepository,
     private readonly booksRepo: BooksRepository,
-    private readonly accessControlRepo: AcessControlRepository,
+    private readonly accessControlRepo: AccessControlRepository,
     private readonly usersService: UserService
   ) {}
 
@@ -31,7 +31,7 @@ export class UserController {
   @UsePipes(new PayloadValidationPipe(createUserReqSchema))
   async add(@Body() body: createUserI) {
     const { role, ...rest } = body;
-    const roleD = await this.accessControlRepo.getRoleByRole({ role });
+    const roleD = await this.accessControlRepo.getRoleInfoByRole({ role });
     const password = generateRandomPassword();
     if (!roleD) {
       throw DbExecptions.DOESNOT_EXISTS("role");
@@ -61,7 +61,7 @@ export class UserController {
     let count: number;
     if (body.role) {
       const roleId = (
-        await this.accessControlRepo.getRoleByRole({ role: body.role })
+        await this.accessControlRepo.getRoleInfoByRole({ role: body.role })
       ).id;
       body.roleId = roleId;
     }
@@ -71,7 +71,17 @@ export class UserController {
         (count = await this.usersRepo.getUsersCount({ ...body })),
       ]);
       const listRes = await Promise.all(
-        list.map((v) => this.usersService.getUserWithImage(v))
+        list
+          .map((v) => this.usersService.getUserWithImage(v))
+          .map(async (v) => {
+            const role = await this.accessControlRepo.getRoleInfoById({
+              id: (await v).roleId,
+            });
+            return {
+              ...v,
+              role: role.role,
+            };
+          })
       );
       return { count, list: listRes };
     } catch (e) {
