@@ -10,6 +10,7 @@ import { DraftController } from "./controllers/draft.controller";
 import { BooksService } from "./services/books.service";
 import { DraftRepository } from "./repositories/draft.repository";
 import { DraftService } from "./services/draft.service";
+import { AccessControlRepository } from "../user/repositories/acess-control.repository";
 
 @Module({
   controllers: [BookController, DraftController],
@@ -22,6 +23,7 @@ import { DraftService } from "./services/draft.service";
     BooksService,
     DraftRepository,
     DraftService,
+    AccessControlRepository,
   ],
   exports: [BooksRepository],
   imports: [ProjectModule],

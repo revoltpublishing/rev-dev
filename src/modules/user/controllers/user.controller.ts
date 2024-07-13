@@ -72,7 +72,7 @@ export class UserController {
         (count = await this.usersRepo.getUsersCount({ ...body })),
       ]);
       const listRes = await Promise.all(
-        list.map((v) => this.usersService.getUserWithImage(v))
+        list.map((v) => this.usersService.getUserWithImage({ user: v }))
       );
       const res = await Promise.all(
         listRes.map(async (v) => {

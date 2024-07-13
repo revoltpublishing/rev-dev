@@ -6,6 +6,11 @@ import { Prisma } from "@prisma/client";
 
 export const userIncludeObject: Prisma.UserInclude = {
   ProfileImage: true,
+  BookUserMap: {
+    include: {
+      Book: {},
+    },
+  },
   UserImageMap: {
     include: {
       Image: {},

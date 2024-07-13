@@ -10,8 +10,6 @@ import { UserService } from "src/modules/user/services/user.service";
 import { BOOK_STAGE_TREE } from "../constants/stage";
 import { StatusCodes } from "src/common/constants/status";
 import { BooksService } from "../services/books.service";
-import { AccessControlRepository } from "src/modules/user/repositories/acess-control.repository";
-import { UsersRepository } from "src/modules/user/repositories/user.repository";
 import { GOD__VIEW_ROLES } from "src/modules/user/constants/roles";
 
 @Controller("books")
@@ -37,15 +35,32 @@ export class BookController {
     if (!GOD__VIEW_ROLES.includes(userDetails.roleId)) {
       body.userId = userDetails.id;
     }
+    if (body.stage) {
+      const stgd = BOOK_STAGE_TREE.find((bk) => bk.stage === body.stage);
+      body.stageId = stgd.id;
+    }
     const list = await this.booksService.getFilteredBooks({ ...body });
     const count = await this.booksService.getFilteredBooksCount({ ...body });
     const listRes = await Promise.all(
       list.map(async (ls) => {
-        const ud = ls["BookUserMap"];
-        ls["BookUserMap"] = await Promise.all(
-          ud.map((u) => this.usersService.getUserWithImage(u["User"]))
+        const obj = { ...ls };
+        const ud = obj["BookUserMap"];
+        const stgs = await Promise.all(
+          obj["BookStage"].map(async (bkstg) => {
+            bkstg.stage = BOOK_STAGE_TREE.find(
+              (v) => v.id === bkstg.stageId
+            ).stage;
+            return bkstg;
+          })
         );
-        return ls;
+        const ump = await Promise.all(
+          ud.map(async (u) =>
+            this.usersService.prepareUserImageRole({ user: u["User"] })
+          )
+        );
+        obj["BookUserMap"] = ump;
+        obj["BookStage"] = stgs;
+        return obj;
       })
     );
     return { count, list: listRes };
