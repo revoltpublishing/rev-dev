@@ -29,15 +29,16 @@ model User {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
-  Image                   Image[]                   @relation(name: "FK_USER_IMAGE_ID")
-  UserImageMap            UserImageMap[]
-  Book                    Book[]
-  BookUserMap             BookUserMap[]
-  ProfileImage            Image?                    @relation(name: "FK_PROFILE_IMAGE_ID", fields: [profileImageId], references: [id])
-  BookStageManuscriptPage BookStageManuscriptPage[]
-  Role                    RoleMaster                @relation(fields: [roleId], references: [id])
-  CreatedByUser           User?                     @relation(fields: [createdBy], references: [id], name: "FK_CREATED_BY_USER_SELF")
-  OtherCreatedByUser      User[]                    @relation(name: "FK_CREATED_BY_USER_SELF")
+  Image                       Image[]                       @relation(name: "FK_USER_IMAGE_ID")
+  UserImageMap                UserImageMap[]
+  Book                        Book[]
+  BookUserMap                 BookUserMap[]
+  ProfileImage                Image?                        @relation(name: "FK_PROFILE_IMAGE_ID", fields: [profileImageId], references: [id])
+  BookStageManuscriptPage     BookStageManuscriptPage[]
+  Role                        RoleMaster                    @relation(fields: [roleId], references: [id])
+  CreatedByUser               User?                         @relation(fields: [createdBy], references: [id], name: "FK_CREATED_BY_USER_SELF")
+  OtherCreatedByUser          User[]                        @relation(name: "FK_CREATED_BY_USER_SELF")
+  BookStageManuscriptActivity BookStageManuscriptActivity[]
 
   @@index([createdAt])
   @@index([accessToken])
@@ -151,10 +152,11 @@ model BookStageManuscript {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  BookStage               BookStage                 @relation(fields: [bkStgId], references: [id])
-  parentManuscriptId      BookStageManuscript?      @relation("PREV_MANUSCRPT_BK_ID", fields: [parentId], references: [id])
-  otherManuscriptId       BookStageManuscript[]     @relation("PREV_MANUSCRPT_BK_ID")
-  BookStageManuscriptPage BookStageManuscriptPage[]
+  BookStage                   BookStage                     @relation(fields: [bkStgId], references: [id])
+  parentManuscriptId          BookStageManuscript?          @relation("PREV_MANUSCRPT_BK_ID", fields: [parentId], references: [id])
+  otherManuscriptId           BookStageManuscript[]         @relation("PREV_MANUSCRPT_BK_ID")
+  BookStageManuscriptPage     BookStageManuscriptPage[]
+  BookStageManuscriptActivity BookStageManuscriptActivity[]
 
   @@index([bkStgId, parentId], name: "MANUSCRIPT_BKSTG_PRNT_idx")
 }
@@ -176,10 +178,21 @@ model BookStageManuscriptPage {
   @@index([bkStgManuId, page])
 }
 
-// model BookStageActivity {
-//   id      String @id @default(uuid())
-//   bkStgId String
-// }
+model BookStageManuscriptActivity {
+  id          String   @id @default(uuid())
+  bkStgManuId String
+  page        Int
+  content     String
+  type        Int
+  createdBy   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  BookStageManuscript         BookStageManuscript @relation(references: [id], fields: [bkStgManuId])
+  BookStageManucriptUpdatedBy User?               @relation(fields: [createdBy], references: [id])
+
+  @@index([bkStgManuId, page])
+}
 
 // *****************************  ACL TABLES STARTED ****************************************
 

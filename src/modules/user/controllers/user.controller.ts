@@ -17,6 +17,7 @@ import { DbExecptions, MessageError } from "src/common/constants/status";
 import { AccessControlRepository } from "../repositories/acess-control.repository";
 import { UserService } from "../services/user.service";
 import { User } from "@prisma/client";
+import { resolveMx } from "dns";
 
 @Controller("users")
 export class UserController {
@@ -71,19 +72,20 @@ export class UserController {
         (count = await this.usersRepo.getUsersCount({ ...body })),
       ]);
       const listRes = await Promise.all(
-        list
-          .map((v) => this.usersService.getUserWithImage(v))
-          .map(async (v) => {
-            const role = await this.accessControlRepo.getRoleInfoById({
-              id: (await v).roleId,
-            });
-            return {
-              ...v,
-              role: role.role,
-            };
-          })
+        list.map((v) => this.usersService.getUserWithImage(v))
       );
-      return { count, list: listRes };
+      const res = await Promise.all(
+        listRes.map(async (v) => {
+          const role = await this.accessControlRepo.getRoleInfoById({
+            id: v.roleId,
+          });
+          return {
+            ...v,
+            role: role.role,
+          };
+        })
+      );
+      return { count, list: res };
     } catch (e) {
       throw new MessageError(e);
     }
