@@ -8,22 +8,22 @@ export const enum BOOK_STAGES_ENUM {
 export const BOOK_STAGE_TREE = [
   {
     id: BOOK_STAGES_ENUM.BOOK_STG_EDTNG,
-    stage: "editing",
+    stage: "EDITING",
     prevId: null,
   },
   {
     id: BOOK_STAGES_ENUM.BOOK_STG_DESGNG,
-    stage: "designing",
+    stage: "DESIGNING",
     prevId: null,
   },
   {
     id: BOOK_STAGES_ENUM.BOOK_STG_TYPSTNG,
-    stage: "typesetting",
+    stage: "TYPESETTING",
     prevId: [BOOK_STAGES_ENUM.BOOK_STG_EDTNG],
   },
   {
     id: BOOK_STAGES_ENUM.BOOK_STG_REVIEW,
-    stage: "review",
+    stage: "REVIEW",
     prevId: [
       BOOK_STAGES_ENUM.BOOK_STG_EDTNG,
       BOOK_STAGES_ENUM.BOOK_STG_DESGNG,
