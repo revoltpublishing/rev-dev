@@ -17,7 +17,6 @@ import { DbExecptions, MessageError } from "src/common/constants/status";
 import { AccessControlRepository } from "../repositories/acess-control.repository";
 import { UserService } from "../services/user.service";
 import { User } from "@prisma/client";
-import { resolveMx } from "dns";
 
 @Controller("users")
 export class UserController {
@@ -79,9 +78,12 @@ export class UserController {
           const role = await this.accessControlRepo.getRoleInfoById({
             id: v.roleId,
           });
+          const bkLst = await this.booksRepo.getUserBooks({ userId: v.id });
           return {
             ...v,
             role: role.role,
+            recentBook: bkLst?.[0],
+            bookCount: bkLst.length,
           };
         })
       );

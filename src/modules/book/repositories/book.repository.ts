@@ -94,4 +94,14 @@ export class BooksRepository {
       },
     });
   }
+  async getUserBooks(params: { userId: string }) {
+    return this.dbClient.bookUserMap.findMany({
+      where: {
+        userId: params.userId,
+      },
+      orderBy: {
+        createdAt: "asc",
+      },
+    });
+  }
 }

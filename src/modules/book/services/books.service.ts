@@ -11,13 +11,17 @@ import {
 } from "../interfaces/book.interface";
 import { BooksRepository } from "../repositories/book.repository";
 import { BOOK_STAGE_TREE } from "../constants/stage";
+import { UserService } from "src/modules/user/services/user.service";
+import { UserFilterObject } from "src/modules/user/constants/filterObjects";
 
 @Injectable()
 export class BooksService {
   constructor(
     private readonly imagesRepo: ImagesRepository,
     private readonly s3Service: S3Service,
-    private readonly bookRepo: BooksRepository
+    private readonly bookRepo: BooksRepository,
+    private readonly usersService: UserService,
+    private readonly userFilterObj: UserFilterObject
   ) {}
 
   buildCreateObject(params: buildCreateBookObjectI): createBookI {
@@ -64,9 +68,7 @@ export class BooksService {
       include: {
         BookUserMap: {
           include: {
-            User: {
-              include: { ProfileImage: true },
-            },
+            User: this.userFilterObj.buildFilterObject(),
           },
         },
         BookStage: {},
