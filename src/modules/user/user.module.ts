@@ -12,6 +12,7 @@ import { UserService } from "./services/user.service";
 import { ProjectModule } from "../project/project.module";
 import { BookModule } from "../book/book.module";
 import { AccessMiddleware } from "src/common/middlewares/userinfo.middleware";
+import { UserFilterObject } from "./constants/filterObjects";
 
 @Module({
   controllers: [AccessControlController, UserController],
@@ -26,6 +27,7 @@ import { AccessMiddleware } from "src/common/middlewares/userinfo.middleware";
     ImagesRepository,
     UserService,
     Logger,
+    UserFilterObject,
   ],
   imports: [ProjectModule, BookModule],
   exports: [AuthService, AccessControlRepository],

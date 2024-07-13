@@ -11,6 +11,7 @@ import { BooksService } from "./services/books.service";
 import { DraftRepository } from "./repositories/draft.repository";
 import { DraftService } from "./services/draft.service";
 import { AccessControlRepository } from "../user/repositories/acess-control.repository";
+import { UserFilterObject } from "../user/constants/filterObjects";
 
 @Module({
   controllers: [BookController, DraftController],
@@ -24,6 +25,7 @@ import { AccessControlRepository } from "../user/repositories/acess-control.repo
     DraftRepository,
     DraftService,
     AccessControlRepository,
+    UserFilterObject,
   ],
   exports: [BooksRepository],
   imports: [ProjectModule],
