@@ -2,6 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { DbClient } from "src/common/services/dbclient.service";
 import {
   addBookStageI,
+  addManuscriptActivityI,
   bookI,
   bookUserI,
   createBookI,
@@ -10,7 +11,6 @@ import {
 } from "../interfaces/book.interface";
 import { Prisma } from "@prisma/client";
 import { prismaErrorMapper } from "src/common/mappers/prisma";
-import { BOOK_STAGE_TREE } from "../constants/stage";
 
 @Injectable()
 export class BooksRepository {
@@ -101,6 +101,18 @@ export class BooksRepository {
       },
       orderBy: {
         createdAt: "asc",
+      },
+    });
+  }
+  async addManuscriptActivity(params: addManuscriptActivityI) {
+    return this.dbClient.bookStageManuscriptActivity.create({
+      data: { ...params },
+    });
+  }
+  async getManuscriptActivityById(params: { mid: string }) {
+    return this.dbClient.bookStageManuscriptActivity.findMany({
+      where: {
+        bkStgManuId: params.mid,
       },
     });
   }

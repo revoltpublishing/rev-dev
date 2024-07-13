@@ -2,6 +2,7 @@ import { Body, Controller, Get, Param, Post, Put, Req } from "@nestjs/common";
 import { BooksRepository } from "../repositories/book.repository";
 import {
   addBookStageReqI,
+  addManuscriptActivityI,
   createBookI,
   filterBookI,
   updateBookStageI,
@@ -96,5 +97,13 @@ export class BookController {
   @Get("/:id/stage/all")
   getBookStages(@Param() params: { id: string }) {
     return this.booksRepo.getBookStages({ bookId: params.id });
+  }
+  @Get("/manuscript/:mid/activity")
+  getManuscriptActivities(@Param("id") id: string) {
+    return this.booksRepo.getManuscriptActivityById({ mid: id });
+  }
+  @Post("/manuscript/activity")
+  addManuscriptActivity(@Body() body: addManuscriptActivityI) {
+    return this.booksRepo.addManuscriptActivity(body);
   }
 }

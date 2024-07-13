@@ -1,7 +1,6 @@
 export interface createResourceParamsI {
   name: string;
-  des?: string;
-  permission: resourcePermissionI[];
+  permissions: resourcePermissionI[];
 }
 
 export interface resourcePermissionI {
