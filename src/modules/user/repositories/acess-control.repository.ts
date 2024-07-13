@@ -17,13 +17,13 @@ export class AccessControlRepository {
     });
   }
   createResource(params: createResourceParamsI) {
-    const { name, des, ...rest } = params;
+    const { name, ...rest } = params;
     return this.dbClient.resource.create({
       data: {
         name,
         ResourcePermission: {
           createMany: {
-            data: rest.permission,
+            data: rest.permissions,
           },
         },
       },

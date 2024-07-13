@@ -86,3 +86,9 @@ export interface bookUserI {
   bookId: string;
   userId: string;
 }
+export interface addManuscriptActivityI {
+  bkStgManuId: string;
+  content: string;
+  type: number;
+  createdBy: string;
+}

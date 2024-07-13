@@ -181,7 +181,6 @@ model BookStageManuscriptPage {
 model BookStageManuscriptActivity {
   id          String   @id @default(uuid())
   bkStgManuId String
-  page        Int
   content     String
   type        Int
   createdBy   String
@@ -191,7 +190,7 @@ model BookStageManuscriptActivity {
   BookStageManuscript         BookStageManuscript @relation(references: [id], fields: [bkStgManuId])
   BookStageManucriptUpdatedBy User?               @relation(fields: [createdBy], references: [id])
 
-  @@index([bkStgManuId, page])
+  @@index([bkStgManuId])
 }
 
 // *****************************  ACL TABLES STARTED ****************************************
