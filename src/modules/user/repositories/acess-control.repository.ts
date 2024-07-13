@@ -31,13 +31,13 @@ export class AccessControlRepository {
   }
 
   createResourceAttribute(params: resourceAttributeI) {
-    const { permission, ...rest } = params;
+    const { permissions, ...rest } = params;
     return this.dbClient.resourceAttribute.create({
       data: {
         ...rest,
         ResourceAttributePermission: {
           createMany: {
-            data: permission,
+            data: permissions,
           },
         },
       },

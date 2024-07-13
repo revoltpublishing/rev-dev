@@ -219,7 +219,6 @@ model ResourceAttribute {
   id         Int      @id @default(autoincrement())
   name       String
   value      String
-  type       String
   resourceId Int
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
