@@ -81,14 +81,14 @@ model Book {
   id           String   @id @default(uuid())
   title        String
   description  String
-  draftImageId String   @unique()
+  draftImageId String?  @unique()
   createdBy    String
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
   BookStage         BookStage[]
   BookUserMap       BookUserMap[]
-  BookDraft         Image         @relation(fields: [draftImageId], references: [id])
+  BookDraft         Image?        @relation(fields: [draftImageId], references: [id])
   BookCreatedByUser User          @relation(fields: [createdBy], references: [id])
 
   @@index([id])

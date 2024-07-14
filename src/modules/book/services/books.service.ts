@@ -20,7 +20,6 @@ export class BooksService {
     private readonly imagesRepo: ImagesRepository,
     private readonly s3Service: S3Service,
     private readonly bookRepo: BooksRepository,
-    private readonly usersService: UserService,
     private readonly userFilterObj: UserFilterObject
   ) {}
 
@@ -37,17 +36,20 @@ export class BooksService {
           ],
         },
       },
-      BookDraft: {
-        connect: {
-          id: params.draftImageId,
-        },
-      },
+      BookDraft: {},
       BookCreatedByUser: {
         connect: {
           id: params.createdBy,
         },
       },
     };
+    if (params.draftImageId) {
+      obj.BookDraft = {
+        connect: {
+          id: params.draftImageId,
+        },
+      };
+    }
     if (params.initBkStg) {
       obj.BookStage = {
         createMany: {
