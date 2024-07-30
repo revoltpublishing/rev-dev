@@ -58,3 +58,10 @@ export {
   USER_ROLE__PM,
   USER_ROLE__TS,
 };
+
+export const userRoleInitCount = {
+  USER_ROLE__AT: 0,
+  USER_ROLE__DS: 0,
+  USER_ROLE__PM: 0,
+  USER_ROLE__TS: 0,
+};

@@ -1,0 +1,49 @@
+{
+  "name": "user",
+  "permissions": [
+    {
+      "roleId": 990,
+      "action": 0
+    },
+    {
+      "roleId": 991,
+      "action": 0
+    },
+    {
+      "roleId": 992,
+      "action": 0
+    },
+    {
+      "roleId": 990,
+      "action": 1
+    },
+    {
+      "roleId": 991,
+      "action": 1
+    },
+    {
+      "roleId": 992,
+      "action": 1
+    }
+  ]
+}
+{
+    "name" : "role",
+    "value" : "PROJECT_MANAGER",
+    "resourceId": 1,
+    "permissions": [
+         {
+             "roleId": 990,
+             "action" : 0
+         },{
+             "roleId": 990,
+             "action" : 1
+         },{
+             "roleId": 991,
+             "action" : 0
+         },{
+             "roleId": 991,
+             "action" : 1
+         }
+     ]
+}

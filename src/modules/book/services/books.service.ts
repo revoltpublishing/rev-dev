@@ -13,6 +13,7 @@ import { BooksRepository } from "../repositories/book.repository";
 import { BOOK_STAGE_TREE } from "../constants/stage";
 import { UserService } from "src/modules/user/services/user.service";
 import { UserFilterObject } from "src/modules/user/constants/filterObjects";
+import { UsersRepository } from "src/modules/user/repositories/user.repository";
 
 @Injectable()
 export class BooksService {

@@ -214,6 +214,8 @@ model Resource {
 
   ResourceAttribute  ResourceAttribute[]
   ResourcePermission ResourcePermission[]
+  ResourceAction     ResourceAction[]
+  resourceActionId   Int
 }
 
 model ResourceAttribute {
@@ -225,6 +227,7 @@ model ResourceAttribute {
   updatedAt  DateTime @updatedAt
 
   ResourceAttributePermission ResourceAttributePermission[]
+  ResourceAttributeAction     ResourceAttributeAction[]
   Resource                    Resource                      @relation(fields: [resourceId], references: [id])
 
   @@unique([resourceId, name, value])
@@ -257,4 +260,29 @@ model ResourceAttributePermission {
   ResourceAttribute ResourceAttribute @relation(fields: [resourceAttributeId], references: [id])
 
   @@index([resourceAttributeId], name: "FK_RAP_RESOURCE_ATTRIBUTE_ID_idx")
+}
+
+model ResourceAction {
+  id         Int @id @default(autoincrement())
+  resourceId Int
+  action     Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  Resource  Resource @relation(fields: [resourceId], references: [id])
+}
+
+model ResourceAttributeAction {
+  id                  Int @id @default(autoincrement())
+  resourceAttributeId Int
+  action              Int
+
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  ResourceAttribute ResourceAttribute @relation(fields: [resourceAttributeId], references: [id])
+}
+
+model ResourceActionDepends {
+  id   Int    @id @default(autoincrement())
+  type String
 }

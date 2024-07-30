@@ -26,6 +26,11 @@ export class StatusCodes {
     "Book can't move to the provided state, as it has dependency on some other stages",
     HttpStatus.NOT_ACCEPTABLE
   );
+  public static readonly MISSING_FIELD = (args: string) =>
+    new HttpException(
+      `${args} type of value is missing`,
+      HttpStatus.NOT_ACCEPTABLE
+    );
 }
 export class DbStatusCodes {
   public static readonly MOBILE_ALREADY_OCCUPIED = {

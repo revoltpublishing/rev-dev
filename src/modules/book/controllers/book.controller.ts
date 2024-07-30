@@ -11,18 +11,31 @@ import { UserService } from "src/modules/user/services/user.service";
 import { BOOK_STAGE_TREE } from "../constants/stage";
 import { StatusCodes } from "src/common/constants/status";
 import { BooksService } from "../services/books.service";
-import { GOD__VIEW_ROLES } from "src/modules/user/constants/roles";
+import {
+  GOD__VIEW_ROLES,
+  userRoleInitCount,
+} from "src/modules/user/constants/roles";
+import { UsersRepository } from "src/modules/user/repositories/user.repository";
 
 @Controller("books")
 export class BookController {
   constructor(
     private readonly booksRepo: BooksRepository,
     private readonly usersService: UserService,
-    private readonly booksService: BooksService
+    private readonly booksService: BooksService,
+    private readonly usersRepo: UsersRepository
   ) {}
   @Post("/add")
   addBook(@Body() body: createBookI, @Req() req: Request) {
     const { userDetails } = req["context"];
+    const tmp = userRoleInitCount;
+    body.bookUsers.forEach(async (buId) => {
+      const ud = await this.usersRepo.getUserById({ id: buId });
+      tmp[ud.Role.role] = 1;
+    });
+    Object.keys(tmp).forEach((k) => {
+      if (tmp[k] === 0) throw StatusCodes.MISSING_FIELD(k);
+    });
     return this.booksService.createBookWithInitStages({
       ...body,
       createdBy: userDetails.id,

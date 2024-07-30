@@ -1,6 +1,14 @@
 export interface createResourceParamsI {
   name: string;
   permissions: resourcePermissionI[];
+  actions: resourceActionI[];
+}
+export interface resourceActionI {
+  action: number;
+  depends: {
+    name: string;
+    type: string;
+  }[];
 }
 
 export interface resourcePermissionI {
@@ -19,3 +27,4 @@ export interface resourceAttributePermissionI {
   roleId: number;
   action: number;
 }
+// 0-c, 1-r, 2-u, 3-d

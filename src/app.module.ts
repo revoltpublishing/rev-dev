@@ -1,4 +1,5 @@
 import {
+  Logger,
   MiddlewareConsumer,
   Module,
   NestModule,
@@ -18,7 +19,7 @@ const AppEnvironmentModule = ConfigModule.forRoot({
 @Module({
   imports: [UsersModule, ProjectModule, BookModule, AppEnvironmentModule],
   controllers: [],
-  providers: [],
+  providers: [Logger],
   exports: [],
 })
 export class AppModule implements NestModule {
@@ -27,6 +28,11 @@ export class AppModule implements NestModule {
       .apply(AccessMiddleware)
       .exclude(
         { path: "access-control/ping", method: RequestMethod.ALL },
+        { path: "access-control/resource", method: RequestMethod.ALL },
+        {
+          path: "access-control/resource/attribute",
+          method: RequestMethod.ALL,
+        },
         { path: "users/add", method: RequestMethod.POST }
       )
       .forRoutes({

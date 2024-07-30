@@ -1,4 +1,5 @@
 import { Injectable } from "@nestjs/common";
+import { Prisma } from "@prisma/client";
 import { DbStatusCodes } from "src/common/constants/status";
 import {
   createResourceParamsI,
@@ -66,52 +67,95 @@ export class AccessControlRepository {
     resc: string;
     roleId: number;
     action: number;
-    attribute: { name: string; value: string };
+    attribute?: { name: string; value: string };
   }) {
-    return this.dbClient.resource.findFirst({
-      where: { name: params.resc },
-      include: {
-        ResourcePermission: {
-          where: {
-            roleId: params.roleId,
-            action: params.action,
+    const includeObj: Prisma.ResourceInclude = {
+      ResourcePermission: {
+        where: {
+          roleId: params.roleId,
+          action: params.action,
+        },
+      },
+      ResourceAction: {
+        where: {
+          action: params.attribute ? undefined : params.action,
+          Resource: {
+            name: params.resc,
           },
         },
-        ResourceAttribute: {
-          where: {
-            name: params.attribute.name,
-            value: params.attribute.value,
+      },
+    };
+    if (params.attribute) {
+      includeObj.ResourceAttribute = {
+        where: {
+          name: params.attribute.name,
+          value: params.attribute.value,
+        },
+        include: {
+          ResourceAttributePermission: {
+            where: {
+              roleId: params.roleId,
+              action: params.action,
+            },
           },
-          include: {
-            ResourceAttributePermission: {
-              where: {
-                roleId: params.roleId,
-                action: params.action,
+          ResourceAttributeAction: {
+            where: {
+              action: params.action,
+              ResourceAttribute: {
+                name: params.attribute.name,
+                value: params.attribute.value,
               },
             },
           },
         },
-      },
+      };
+    }
+    return this.dbClient.resource.findFirst({
+      where: { name: params.resc },
+      include: includeObj,
     });
   }
-  getResourceAttributebInfo(params: { resc: string; atb: string }) {
-    return this.dbClient.resourceAttribute.findMany({
+  getResourceDetails(params: { name: string; action: number }) {
+    return this.dbClient.resource.findFirst({
       where: {
-        name: params.atb,
-        Resource: {
-          name: params.resc,
-        },
+        name: params.name,
       },
       include: {
-        Resource: {
-          include: {
-            ResourcePermission: {},
+        ResourceAction: {
+          where: {
+            action: params.action,
           },
         },
-        ResourceAttributePermission: {},
       },
     });
   }
+  getResourceAttributebInfo(params: {
+    rescId: number;
+    atb: {
+      name: string;
+      value: string;
+    };
+    action: number;
+    roleId: number;
+  }) {
+    return this.dbClient.resourceAttribute.findMany({
+      where: {
+        name: params.atb.name,
+        value: params.atb.value,
+        resourceId: params.rescId,
+      },
+      include: {
+        ResourceAttributePermission: {
+          where: {
+            action: params.action,
+            roleId: params.roleId,
+          },
+        },
+        ResourceAttributeAction: {},
+      },
+    });
+  }
+
   getRoleInfoByRole(params: { role: string }) {
     try {
       return this.dbClient.roleMaster.findFirst({
@@ -133,5 +177,10 @@ export class AccessControlRepository {
     } catch (e) {
       throw DbStatusCodes.ROLE_DOESNOT_EXISTS;
     }
+  }
+  getDynamicServiceMap(params: { resc: string; whereBody: any }) {
+    return this.dbClient?.[params.resc].findFirst({
+      where: params.whereBody,
+    });
   }
 }

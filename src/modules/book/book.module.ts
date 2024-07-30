@@ -1,4 +1,4 @@
-import { Module } from "@nestjs/common";
+import { Logger, Module } from "@nestjs/common";
 import { BookController } from "./controllers/book.controller";
 import { BooksRepository } from "./repositories/book.repository";
 import { DbClient } from "src/common/services/dbclient.service";
@@ -12,6 +12,8 @@ import { DraftRepository } from "./repositories/draft.repository";
 import { DraftService } from "./services/draft.service";
 import { AccessControlRepository } from "../user/repositories/acess-control.repository";
 import { UserFilterObject } from "../user/constants/filterObjects";
+import { UsersRepository } from "../user/repositories/user.repository";
+import { UsersModule } from "../user/user.module";
 
 @Module({
   controllers: [BookController, DraftController],
@@ -26,6 +28,8 @@ import { UserFilterObject } from "../user/constants/filterObjects";
     DraftService,
     AccessControlRepository,
     UserFilterObject,
+    UsersRepository,
+    Logger,
   ],
   exports: [BooksRepository],
   imports: [ProjectModule],
