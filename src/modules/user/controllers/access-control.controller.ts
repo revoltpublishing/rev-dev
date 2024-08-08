@@ -1,7 +1,9 @@
-import { Body, Controller, Get, Post, Req } from "@nestjs/common";
+import { Body, Controller, Get, Param, Post, Req } from "@nestjs/common";
 import { AccessControlRepository } from "../repositories/acess-control.repository";
 import {
+  createResourceActionI,
   createResourceParamsI,
+  resourceActionDependI,
   resourceAttributeI,
 } from "src/common/interfaces/roles.interface";
 
@@ -14,31 +16,19 @@ export class AccessControlController {
     return "pong!";
   }
   @Post("/resource")
-  async createResource(@Body() params: createResourceParamsI) {
-    return await this.accessControlRepo.createResource(params);
+  async createResource(@Body() body: createResourceParamsI) {
+    return await this.accessControlRepo.createResource(body);
   }
   @Post("/resource/attribute")
-  async createResourceAttribute(@Body() params: resourceAttributeI) {
-    return await this.accessControlRepo.createResourceAttribute(params);
+  async createResourceAttribute(@Body() body: resourceAttributeI) {
+    return await this.accessControlRepo.createResourceAttribute(body);
+  }
+  @Post("/resource/action")
+  async createResourceAction(@Body() body: createResourceActionI) {
+    return await this.accessControlRepo.createResourceAction(body);
+  }
+  @Post("/resource/action/depends")
+  async addResourceActionDepends(@Body() body: resourceActionDependI[]) {
+    return await this.accessControlRepo.createResourceActionDepends(body);
   }
 }
-
-// "attribute" : [{
-//         "name" : "ROLE",
-//         "value" : "ADMIN",
-//         "permission" : [{
-//             "roleId" : 990,
-//             "action" : 1
-//     }]
-//     },{
-//     "name" : "ROLE",
-//     "value" : "AUTHOR",
-//     "permission" : [{
-//         "roleId" : 990,
-//         "action" : 1
-//         },{
-//         "roleId" : 991,
-//         "action" : 1
-//         }
-//     ]
-// }]

@@ -29,6 +29,12 @@ export class AppModule implements NestModule {
       .exclude(
         { path: "access-control/ping", method: RequestMethod.ALL },
         { path: "access-control/resource", method: RequestMethod.ALL },
+        { path: "access-control/resource/action", method: RequestMethod.ALL },
+        {
+          path: "access-control/resource/action/depends",
+          method: RequestMethod.ALL,
+        },
+
         {
           path: "access-control/resource/attribute",
           method: RequestMethod.ALL,

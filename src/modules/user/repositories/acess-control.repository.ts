@@ -2,7 +2,10 @@ import { Injectable } from "@nestjs/common";
 import { Prisma } from "@prisma/client";
 import { DbStatusCodes } from "src/common/constants/status";
 import {
+  createResourceActionI,
   createResourceParamsI,
+  resourceActionDependI,
+  resourceActionI,
   resourceAttributeI,
 } from "src/common/interfaces/roles.interface";
 import { DbClient } from "src/common/services/dbclient.service";
@@ -18,51 +21,96 @@ export class AccessControlRepository {
     });
   }
   createResource(params: createResourceParamsI) {
-    const { name, ...rest } = params;
+    const { name } = params;
     return this.dbClient.resource.create({
       data: {
         name,
-        ResourcePermission: {
-          createMany: {
-            data: rest.permissions,
+        ResourceAction: {
+          create: {
+            action: params.action.action,
+            ResourceActionPermission: {
+              create: params.action.permissions,
+            },
+            ...(params.action.depends && {
+              ResourceActionDepend: {
+                create: params.action.depends,
+              },
+            }),
           },
         },
+      },
+      include: {
+        ResourceAction: {},
+        ResourceActionDepend: {},
+        ResourceAttribute: {},
+      },
+    });
+  }
+  createResourceActionDepends(params: resourceActionDependI[]) {
+    return this.dbClient.resourceActionDepend.createMany({
+      data: params,
+    });
+  }
+
+  createResourceAction(params: createResourceActionI) {
+    return this.dbClient.resourceAction.create({
+      data: {
+        action: params.action,
+        resourceId: params.resourceId,
+        ...(params.depends && {
+          ResourceActionDepend: {
+            createMany: {
+              data: params.depends,
+            },
+          },
+        }),
+        ResourceActionPermission: {
+          createMany: {
+            data: params.permissions,
+          },
+        },
+      },
+      include: {
+        ResourceActionPermission: {},
+        ResourceActionDepend: {},
+        Resource: {},
       },
     });
   }
 
   createResourceAttribute(params: resourceAttributeI) {
-    const { permissions, ...rest } = params;
     return this.dbClient.resourceAttribute.create({
       data: {
-        ...rest,
-        ResourceAttributePermission: {
-          createMany: {
-            data: permissions,
-          },
-        },
-      },
-    });
-  }
-
-  getResourcesByRole(params: { role: number }) {
-    return this.dbClient.resourcePermission.findMany({
-      include: {
-        Resource: {
-          include: {
-            ResourceAttribute: {
-              include: {
-                ResourceAttributePermission: {},
+        name: params.name,
+        value: params.value,
+        resourceId: params.resourceId,
+        ResourceAttributeAction: {
+          create: {
+            action: params.action.action,
+            ...(params.action.depends && {
+              ResourceAttributeActionDepend: {
+                createMany: {
+                  data: params.action.depends,
+                },
+              },
+            }),
+            ResourceAttributeActionPermission: {
+              createMany: {
+                data: params.action.permissions,
               },
             },
           },
         },
       },
-      where: {
-        roleId: params.role,
+      include: {
+        ResourceAttributeAction: {},
+        ResourceActionDepend: {},
+        ResourceAttributeActionDepend: {},
+        Resource: {},
       },
     });
   }
+
   async getResourceInfo(params: {
     resc: string;
     roleId: number;
@@ -70,17 +118,20 @@ export class AccessControlRepository {
     attribute?: { name: string; value: string };
   }) {
     const includeObj: Prisma.ResourceInclude = {
-      ResourcePermission: {
-        where: {
-          roleId: params.roleId,
-          action: params.action,
-        },
-      },
       ResourceAction: {
         where: {
-          action: params.attribute ? undefined : params.action,
+          action: params.action,
           Resource: {
             name: params.resc,
+          },
+        },
+        include: {
+          ResourceActionPermission: {},
+          ResourceActionDepend: {
+            include: {
+              Resource: {},
+              ResourceAttribute: {},
+            },
           },
         },
       },
@@ -92,18 +143,16 @@ export class AccessControlRepository {
           value: params.attribute.value,
         },
         include: {
-          ResourceAttributePermission: {
-            where: {
-              roleId: params.roleId,
-              action: params.action,
-            },
-          },
           ResourceAttributeAction: {
-            where: {
-              action: params.action,
-              ResourceAttribute: {
-                name: params.attribute.name,
-                value: params.attribute.value,
+            include: {
+              ResourceAttributeActionDepend: {
+                include: {
+                  Resource: {},
+                  ResourceAttribute: {},
+                },
+              },
+              ResourceAttributeActionPermission: {
+                include: {},
               },
             },
           },
@@ -125,11 +174,14 @@ export class AccessControlRepository {
           where: {
             action: params.action,
           },
+          include: {
+            ResourceActionDepend: {},
+          },
         },
       },
     });
   }
-  getResourceAttributebInfo(params: {
+  getResourceAttributesInfo(params: {
     rescId: number;
     atb: {
       name: string;
@@ -145,13 +197,12 @@ export class AccessControlRepository {
         resourceId: params.rescId,
       },
       include: {
-        ResourceAttributePermission: {
-          where: {
-            action: params.action,
-            roleId: params.roleId,
+        ResourceAttributeAction: {
+          include: {
+            ResourceAttributeActionPermission: {},
+            ResourceAttributeActionDepend: {},
           },
         },
-        ResourceAttributeAction: {},
       },
     });
   }

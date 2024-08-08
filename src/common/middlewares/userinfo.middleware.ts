@@ -3,6 +3,10 @@ import { AuthService } from "src/modules/user/repositories/auth.repository";
 import { StatusCodes } from "../constants/status";
 import { ACTION_TYPES } from "../constants/action";
 import { AccessControlRepository } from "src/modules/user/repositories/acess-control.repository";
+import {
+  RESOURCE__DATA_TYPE,
+  RESOURCE_ATTRIB_DATA_TYPE,
+} from "src/modules/user/constants/roles";
 
 @Injectable()
 export class AccessMiddleware implements NestMiddleware {
@@ -41,38 +45,37 @@ export class AccessMiddleware implements NestMiddleware {
       attribute: atb,
     });
     this.logger.log(rescInfo, "Resources of user!");
-    if (rescInfo.ResourcePermission.length === 0) {
+    if (rescInfo.ResourceAction.length === 0) {
       throw StatusCodes.ACCESS_NOT_ALLOWED;
     }
     if (rescInfo.ResourceAction.length > 0) {
-      rescInfo.ResourceAction[0]?.depends.forEach(async (dp) => {
-        if (dp["type"] === "resc") {
+      rescInfo.ResourceActionDepend.forEach(async (dp) => {
+        if (dp.type === RESOURCE__DATA_TYPE) {
           // check if the values exists in that resource and provide needed value
-          dp["name"];
           const resD = await this.accessControlRepo.getResourceDetails({
-            name: dp["name"],
+            name: dp.value,
             action: action.value,
           });
-          const resDep = resD.ResourceAction[0]?.depends;
+          const resDep = resD.ResourceAction?.[0].ResourceActionDepend;
           const mapp = new Map<string, any>();
           resDep.forEach((dp) => {
-            mapp.set(dp, req.body[dp]);
+            mapp.set(dp.value, req.body[dp.value]);
           });
           const vals = this.accessControlRepo.getDynamicServiceMap({
-            resc: dp["name"],
+            resc: dp.value,
             whereBody: { ...Object.fromEntries(mapp) },
           });
           if (vals?.length === 0) throw StatusCodes.ACCESS_NOT_ALLOWED;
         }
-        if (dp["type"] === "attrb") {
+        if (dp.type === RESOURCE_ATTRIB_DATA_TYPE) {
           // check if the values exists in that resource
           // get attrib with resid and name of attrib
           const resAttrib =
-            await this.accessControlRepo.getResourceAttributebInfo({
+            await this.accessControlRepo.getResourceAttributesInfo({
               rescId: rescInfo.id,
               atb: {
-                name: dp["name"],
-                value: req.body?.[dp["name"]],
+                name: dp.value,
+                value: req.body?.[dp.value],
               },
               action: action.value,
               roleId: userDetails.roleId,

@@ -201,9 +201,9 @@ model RoleMaster {
   role      String   @unique
   createdAt DateTime @default(now())
 
-  User                        User[]
-  ResourcePermission          ResourcePermission[]
-  ResourceAttributePermission ResourceAttributePermission[]
+  User                              User[]
+  ResourceActionPermission          ResourceActionPermission[]
+  ResourceAttributeActionPermission ResourceAttributeActionPermission[]
 }
 
 model Resource {
@@ -212,10 +212,10 @@ model Resource {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  ResourceAttribute  ResourceAttribute[]
-  ResourcePermission ResourcePermission[]
-  ResourceAction     ResourceAction[]
-  resourceActionId   Int
+  ResourceAttribute             ResourceAttribute[]
+  ResourceAction                ResourceAction[]
+  ResourceActionDepend          ResourceActionDepend[]
+  ResourceAttributeActionDepend ResourceAttributeActionDepend[]
 }
 
 model ResourceAttribute {
@@ -226,63 +226,96 @@ model ResourceAttribute {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
-  ResourceAttributePermission ResourceAttributePermission[]
-  ResourceAttributeAction     ResourceAttributeAction[]
-  Resource                    Resource                      @relation(fields: [resourceId], references: [id])
+  ResourceAttributeAction       ResourceAttributeAction[]
+  Resource                      Resource                        @relation(fields: [resourceId], references: [id])
+  ResourceActionDepend          ResourceActionDepend[]
+  ResourceAttributeActionDepend ResourceAttributeActionDepend[]
 
   @@unique([resourceId, name, value])
   @@index([resourceId], name: "FK_RA_RESOURCE_ID_idx")
 }
 
-model ResourcePermission {
+model ResourceAction {
   id         Int      @id @default(autoincrement())
-  roleId     Int
   resourceId Int
   action     Int
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
-  Resource Resource   @relation(fields: [resourceId], references: [id])
-  Role     RoleMaster @relation(fields: [roleId], references: [id])
+  Resource                 Resource                   @relation(fields: [resourceId], references: [id])
+  ResourceActionDepend     ResourceActionDepend[]
+  ResourceActionPermission ResourceActionPermission[]
 
-  @@index([resourceId], name: "FK_RP_RESOURCE_ID_idx")
+  @@unique([resourceId, action])
+  @@index([resourceId, action], name: "FK_RESOURCE_ID_ACTION_idx")
 }
 
-model ResourceAttributePermission {
+model ResourceActionPermission {
+  id               Int      @id @default(autoincrement())
+  resourceActionId Int
+  roleId           Int
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  ResourceAction ResourceAction @relation(fields: [resourceActionId], references: [id])
+  Role           RoleMaster     @relation(fields: [roleId], references: [id])
+
+  @@index([resourceActionId, roleId], name: "FK_RAP_RESOURCE_ID__ROLE_ID_idx")
+}
+
+model ResourceAttributeAction {
   id                  Int      @id @default(autoincrement())
-  roleId              Int
   resourceAttributeId Int
   action              Int
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
 
-  Role              RoleMaster        @relation(fields: [roleId], references: [id])
-  ResourceAttribute ResourceAttribute @relation(fields: [resourceAttributeId], references: [id])
+  ResourceAttribute                 ResourceAttribute                   @relation(fields: [resourceAttributeId], references: [id])
+  ResourceAttributeActionPermission ResourceAttributeActionPermission[]
+  ResourceAttributeActionDepend     ResourceAttributeActionDepend[]
 
-  @@index([resourceAttributeId], name: "FK_RAP_RESOURCE_ATTRIBUTE_ID_idx")
+  @@index([resourceAttributeId, action], name: "FK_RESOURCE_ATTRIBUTE_ID_ACTION_idx")
 }
 
-model ResourceAction {
-  id         Int @id @default(autoincrement())
-  resourceId Int
-  action     Int
+model ResourceAttributeActionPermission {
+  id                        Int      @id @default(autoincrement())
+  resourceAttributeActionId Int
+  roleId                    Int
+  createdAt                 DateTime @default(now())
+  updatedAt                 DateTime @updatedAt
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  Resource  Resource @relation(fields: [resourceId], references: [id])
+  ResourceAttributeAction ResourceAttributeAction @relation(fields: [resourceAttributeActionId], references: [id])
+  Role                    RoleMaster              @relation(fields: [roleId], references: [id])
+
+  @@index([resourceAttributeActionId, roleId], name: "FK_RAAP_RESOURCE_ID__ROLE_ID_idx")
 }
 
-model ResourceAttributeAction {
-  id                  Int @id @default(autoincrement())
-  resourceAttributeId Int
-  action              Int
+model ResourceActionDepend {
+  id               Int      @id @default(autoincrement())
+  type             String
+  value            String
+  resourceActionId Int
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
-  createdAt         DateTime          @default(now())
-  updatedAt         DateTime          @updatedAt
-  ResourceAttribute ResourceAttribute @relation(fields: [resourceAttributeId], references: [id])
+  ResourceAction      ResourceAction     @relation(fields: [resourceActionId], references: [id])
+  Resource            Resource?          @relation(fields: [resourceId], references: [id])
+  resourceId          Int?
+  ResourceAttribute   ResourceAttribute? @relation(fields: [resourceAttributeId], references: [id])
+  resourceAttributeId Int?
 }
 
-model ResourceActionDepends {
-  id   Int    @id @default(autoincrement())
-  type String
+model ResourceAttributeActionDepend {
+  id                       Int      @id @default(autoincrement())
+  type                     String
+  value                    String
+  resourceAttibuteActionId Int
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
+
+  ResourceAttributeAction ResourceAttributeAction @relation(fields: [resourceAttibuteActionId], references: [id])
+  Resource                Resource?               @relation(fields: [resourceId], references: [id])
+  resourceId              Int?
+  ResourceAttribute       ResourceAttribute?      @relation(fields: [resourceAttributeId], references: [id])
+  resourceAttributeId     Int?
 }
