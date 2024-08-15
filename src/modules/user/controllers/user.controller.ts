@@ -6,7 +6,7 @@ import {
   UseGuards,
   UsePipes,
 } from "@nestjs/common";
-import { LoggedInGuard } from "src/common/guards/loggedin.guard";
+import { AccessGuard } from "src/common/guards/access.guard";
 import { createUserI, filterUserI } from "../interfaces/user.interface";
 import { UsersRepository } from "../repositories/user.repository";
 import { PayloadValidationPipe } from "src/common/pipes/payload.pipe";
@@ -28,6 +28,7 @@ export class UserController {
   ) {}
 
   @Post("/add")
+  @UseGuards(AccessGuard)
   @UsePipes(new PayloadValidationPipe(createUserReqSchema))
   async add(@Body() body: createUserI) {
     const { role, ...rest } = body;
@@ -51,7 +52,7 @@ export class UserController {
     return { message: "created successfully", user: ud };
   }
   @Get("/here")
-  @UseGuards(LoggedInGuard)
+  @UseGuards(AccessGuard)
   async here() {
     return "here";
   }

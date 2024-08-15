@@ -1,5 +1,43 @@
+INSERT INTO "RoleMaster" (id, "role") VALUES
+(990, 'SUPER_ADMIN'),
+(991, 'ADMIN'),
+(992, 'PROJECT_MANAGER'),
+(993, 'AUTHOR'),
+(994, 'DESIGNER'),
+(995, 'TYPE_SETTER'),
+(996, 'VIEWER');
 {
-  "resourceId": 7,
+  "name": "user",
+  "action" : {
+          "action": 0,
+          "permissions" : [
+              {
+                  "roleId": 990
+              }
+          ]
+      }
+            
+}
+
+{
+  "resourceId": 2,
+  "name": "role",
+  "value": "DESIGNER",
+  "action": {
+    "action": 0,
+    "permissions": [
+      {
+        "roleId": 990
+      },{
+        "roleId": 991
+      },{
+        "roleId": 992
+      }
+    ]
+  }
+}
+{
+  "resourceId": 2,
   "name": "role",
   "value": "PROJECT_MANAGER",
   "action": {
@@ -7,12 +45,13 @@
     "permissions": [
       {
         "roleId": 990
+      },{
+        "roleId": 991
       }
     ]
   }
 }
 
-http://localhost:3001/api/access-control/resource/attribute
 {           
             "resourceId" : 7,
             "name" : "role",

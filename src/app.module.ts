@@ -38,8 +38,8 @@ export class AppModule implements NestModule {
         {
           path: "access-control/resource/attribute",
           method: RequestMethod.ALL,
-        },
-        { path: "users/add", method: RequestMethod.POST }
+        }
+        // { path: "users/add", method: RequestMethod.POST }
       )
       .forRoutes({
         path: "*",

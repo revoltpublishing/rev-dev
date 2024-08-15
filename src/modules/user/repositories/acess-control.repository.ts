@@ -127,12 +127,7 @@ export class AccessControlRepository {
         },
         include: {
           ResourceActionPermission: {},
-          ResourceActionDepend: {
-            include: {
-              Resource: {},
-              ResourceAttribute: {},
-            },
-          },
+          ResourceActionDepend: {},
         },
       },
     };
@@ -161,7 +156,40 @@ export class AccessControlRepository {
     }
     return this.dbClient.resource.findFirst({
       where: { name: params.resc },
-      include: includeObj,
+      include: {
+        ResourceAction: {
+          where: {
+            action: params.action,
+          },
+          include: {
+            ResourceActionPermission: {},
+            ResourceActionDepend: {},
+          },
+        },
+        ...(params.attribute && {
+          ResourceAttribute: {
+            where: {
+              name: params.attribute.name,
+              value: params.attribute.value,
+            },
+            include: {
+              ResourceAttributeAction: {
+                include: {
+                  ResourceAttributeActionDepend: {
+                    include: {
+                      Resource: {},
+                      ResourceAttribute: {},
+                    },
+                  },
+                  ResourceAttributeActionPermission: {
+                    include: {},
+                  },
+                },
+              },
+            },
+          },
+        }),
+      },
     });
   }
   getResourceDetails(params: { name: string; action: number }) {
@@ -190,7 +218,7 @@ export class AccessControlRepository {
     action: number;
     roleId: number;
   }) {
-    return this.dbClient.resourceAttribute.findMany({
+    return this.dbClient.resourceAttribute.findFirst({
       where: {
         name: params.atb.name,
         value: params.atb.value,
@@ -199,7 +227,11 @@ export class AccessControlRepository {
       include: {
         ResourceAttributeAction: {
           include: {
-            ResourceAttributeActionPermission: {},
+            ResourceAttributeActionPermission: {
+              where: {
+                roleId: params.roleId,
+              },
+            },
             ResourceAttributeActionDepend: {},
           },
         },

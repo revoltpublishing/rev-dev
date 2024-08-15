@@ -10,7 +10,7 @@ export class AuthService {
   ) {}
 
   async getUserInfoByAccessToken(params: { token: string }) {
-    return this.dbClient.user.findFirst({
+    return this.dbClient.user.findUnique({
       where: {
         accessToken: params.token,
       },

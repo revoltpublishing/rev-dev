@@ -303,6 +303,8 @@ model ResourceActionDepend {
   resourceId          Int?
   ResourceAttribute   ResourceAttribute? @relation(fields: [resourceAttributeId], references: [id])
   resourceAttributeId Int?
+
+  @@unique([type, value, resourceActionId])
 }
 
 model ResourceAttributeActionDepend {
@@ -318,4 +320,6 @@ model ResourceAttributeActionDepend {
   resourceId              Int?
   ResourceAttribute       ResourceAttribute?      @relation(fields: [resourceAttributeId], references: [id])
   resourceAttributeId     Int?
+
+  @@unique([type, value, resourceAttibuteActionId])
 }
