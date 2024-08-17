@@ -67,10 +67,16 @@ export class BookController {
     return { count, list: listRes };
   }
 
-  @Get("/:id")
-  async getBookById(@Param() params: { id: string }) {
+  @Get("/:id/:stage")
+  async getBookById(@Param() params: { id: string; stage: string }) {
     return await this.booksService.getBookWithDraftImage(
-      await this.booksRepo.getBookById({ id: params.id })
+      await this.booksRepo.getBookById({
+        id: params.id,
+        stageId:
+          params.stage !== "null"
+            ? BOOK_STAGE_TREE.find((bk) => bk.stage === params.stage).id
+            : undefined,
+      })
     );
   }
   // changes for bk stage to book id and stage name

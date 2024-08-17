@@ -15,7 +15,6 @@ import { prismaErrorMapper } from "src/common/mappers/prisma";
 @Injectable()
 export class BooksRepository {
   constructor(private readonly dbClient: DbClient) {}
-
   async createBook(params: createBookI) {
     const { bookUsers, createdBy, draftImageId, ...rest } = params;
     try {
@@ -77,15 +76,25 @@ export class BooksRepository {
       },
     });
   }
-  async getBookById(params: { id: string }) {
+  async getBookById(params: { id: string; stageId?: number }) {
     return this.dbClient.book.findFirst({
       where: { id: params.id },
       include: {
         BookStage: {
+          ...(params.stageId && {
+            where: {
+              stageId: params.stageId,
+            },
+          }),
           include: {
             BookStageImageMap: {
               include: {
                 Image: true,
+              },
+            },
+            BookStageManuscript: {
+              include: {
+                BookStageManuscriptActivity: {},
               },
             },
           },

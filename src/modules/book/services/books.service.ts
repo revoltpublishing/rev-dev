@@ -73,7 +73,11 @@ export class BooksService {
             User: this.userFilterObj.buildFilterObject(),
           },
         },
-        BookStage: {},
+        BookStage: {
+          include: {
+            BookStageManuscript: {},
+          },
+        },
       },
     };
     if (params.pg) obj.skip = params.pg && params.pg == 1 ? 0 : params.pg * 10;
