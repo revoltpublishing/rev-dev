@@ -14,6 +14,11 @@ import { AccessControlRepository } from "../user/repositories/acess-control.repo
 import { UserFilterObject } from "../user/constants/filterObjects";
 import { UsersRepository } from "../user/repositories/user.repository";
 import { UsersModule } from "../user/user.module";
+import { AccessGuard } from "src/common/guards/access.guard";
+import {
+  ResourceAttributeGuard,
+  ResourceGuard,
+} from "src/common/guards/resource.guard";
 
 @Module({
   controllers: [BookController, DraftController],
@@ -29,6 +34,9 @@ import { UsersModule } from "../user/user.module";
     AccessControlRepository,
     UserFilterObject,
     UsersRepository,
+    AccessGuard,
+    ResourceAttributeGuard,
+    ResourceGuard,
     Logger,
   ],
   exports: [BooksRepository],

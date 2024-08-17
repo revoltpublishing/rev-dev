@@ -9,8 +9,7 @@ import { UsersModule } from "./modules/user/user.module";
 import { ProjectModule } from "./modules/project/project.module";
 import { ConfigModule } from "@nestjs/config";
 import { BookModule } from "./modules/book/book.module";
-import { AccessMiddleware } from "./common/middlewares/userinfo.middleware";
-
+import { AccessMiddleware } from "./common/middlewares/access.middleware";
 const AppEnvironmentModule = ConfigModule.forRoot({
   envFilePath: "./.env",
   isGlobal: true,

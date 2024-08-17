@@ -254,6 +254,8 @@ model ResourceActionPermission {
   id               Int      @id @default(autoincrement())
   resourceActionId Int
   roleId           Int
+  isCreated        Boolean  @default(false)
+  isIncluded       Boolean  @default(false)
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
@@ -281,6 +283,8 @@ model ResourceAttributeActionPermission {
   id                        Int      @id @default(autoincrement())
   resourceAttributeActionId Int
   roleId                    Int
+  isCreated                 Boolean  @default(false)
+  isIncluded                Boolean  @default(false)
   createdAt                 DateTime @default(now())
   updatedAt                 DateTime @updatedAt
 

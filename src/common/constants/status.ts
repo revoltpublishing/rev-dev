@@ -9,7 +9,7 @@ export class MessageError extends Error {
   }
 }
 
-export class StatusCodes {
+export class CommonExceptions {
   public static readonly INVALID_ACCESS_TOKEN = new HttpException(
     "Access Token is invalid",
     HttpStatus.UNAUTHORIZED

@@ -1,4 +1,13 @@
-import { Body, Controller, Get, Param, Post, Put, Req } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Put,
+  Req,
+  UseGuards,
+} from "@nestjs/common";
 import { BooksRepository } from "../repositories/book.repository";
 import {
   addBookStageReqI,
@@ -9,13 +18,14 @@ import {
 } from "../interfaces/book.interface";
 import { UserService } from "src/modules/user/services/user.service";
 import { BOOK_STAGE_TREE } from "../constants/stage";
-import { StatusCodes } from "src/common/constants/status";
+import { CommonExceptions } from "src/common/constants/status";
 import { BooksService } from "../services/books.service";
 import {
   GOD__VIEW_ROLES,
   userRoleInitCount,
 } from "src/modules/user/constants/roles";
 import { UsersRepository } from "src/modules/user/repositories/user.repository";
+import { AccessGuard } from "src/common/guards/access.guard";
 
 @Controller("books")
 export class BookController {
@@ -26,6 +36,7 @@ export class BookController {
     private readonly usersRepo: UsersRepository
   ) {}
   @Post("/add")
+  // @UseGuards(AccessGuard)
   addBook(@Body() body: createBookI, @Req() req: Request) {
     const { userDetails } = req["context"];
     const tmp = userRoleInitCount;
@@ -34,7 +45,7 @@ export class BookController {
       tmp[ud.Role.role] = 1;
     });
     Object.keys(tmp).forEach((k) => {
-      if (tmp[k] === 0) throw StatusCodes.MISSING_FIELD(k);
+      if (tmp[k] === 0) throw CommonExceptions.MISSING_FIELD(k);
     });
     return this.booksService.createBookWithInitStages({
       ...body,
@@ -94,7 +105,7 @@ export class BookController {
     if (stgD.prevId !== null) {
       stgD.prevId.forEach((st) => {
         const bkStage = bkStgs.find((bkStg) => bkStg.stageId === st);
-        if (!bkStage) throw StatusCodes.INVALID_BOOK_STAGE_REDIRECTION;
+        if (!bkStage) throw CommonExceptions.INVALID_BOOK_STAGE_REDIRECTION;
       });
     }
     return this.booksRepo.addBookStageDetails({ ...body, stageId: stgD.id });

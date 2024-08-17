@@ -70,3 +70,14 @@ INSERT INTO "RoleMaster" (id, "role") VALUES
                 }
             
 }
+
+
+  "draftImageId": "fc663e07-b90f-43df-a50e-7e947e64607e",
+    "description": "des",
+    "bookUsers": [
+        "2aac8fcd-b4bd-4dc9-818e-541f8327cce8",
+        "dd8e3f2e-214a-4da5-97f0-1eca2dc8bd94",
+        "a10f125a-18b4-4ab8-8579-89d3bc6dfb92",
+        "81bac5d1-68b5-44a0-bd91-1cb33d434962",
+        "1a43357a-19c3-40f1-aa79-dc50a6b93828"
+    ]

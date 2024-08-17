@@ -162,7 +162,11 @@ export class AccessControlRepository {
             action: params.action,
           },
           include: {
-            ResourceActionPermission: {},
+            ResourceActionPermission: {
+              where: {
+                roleId: params.roleId,
+              },
+            },
             ResourceActionDepend: {},
           },
         },
@@ -174,15 +178,15 @@ export class AccessControlRepository {
             },
             include: {
               ResourceAttributeAction: {
+                where: {
+                  action: params.action,
+                },
                 include: {
-                  ResourceAttributeActionDepend: {
-                    include: {
-                      Resource: {},
-                      ResourceAttribute: {},
-                    },
-                  },
+                  ResourceAttributeActionDepend: {},
                   ResourceAttributeActionPermission: {
-                    include: {},
+                    where: {
+                      roleId: params.roleId,
+                    },
                   },
                 },
               },
@@ -192,7 +196,7 @@ export class AccessControlRepository {
       },
     });
   }
-  getResourceDetails(params: { name: string; action: number }) {
+  getResourceDetails(params: { name: string; action: number; roleId: number }) {
     return this.dbClient.resource.findFirst({
       where: {
         name: params.name,
@@ -204,6 +208,11 @@ export class AccessControlRepository {
           },
           include: {
             ResourceActionDepend: {},
+            ResourceActionPermission: {
+              where: {
+                roleId: params.roleId,
+              },
+            },
           },
         },
       },
