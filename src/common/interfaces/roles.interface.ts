@@ -40,3 +40,14 @@ export interface resourceAttributePermissionI {
   action: number;
 }
 // 0-c, 1-r, 2-u, 3-d
+export interface resourceAttributeBodyI {
+  name: string;
+  value: string;
+  resourceId: number;
+  action: number;
+}
+export interface resourceAttributePermissionsBodyI {
+  name: string;
+  action: number;
+  atb?: resourceAttributeBodyI;
+}

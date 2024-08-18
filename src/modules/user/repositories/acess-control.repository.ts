@@ -4,6 +4,7 @@ import { DbStatusCodes } from "src/common/constants/status";
 import {
   createResourceActionI,
   createResourceParamsI,
+  resourceAttributeBodyI,
   resourceActionDependI,
   resourceActionI,
   resourceAttributeI,
@@ -273,6 +274,73 @@ export class AccessControlRepository {
   getDynamicServiceMap(params: { resc: string; whereBody: any }) {
     return this.dbClient?.[params.resc].findFirst({
       where: params.whereBody,
+    });
+  }
+  getResourcesPermission(params: {
+    resources: {
+      name: string;
+      action: number;
+      atb?: resourceAttributeBodyI;
+    }[];
+    roleId: number;
+  }) {
+    return this.dbClient.resource.findMany({
+      where: {
+        OR: params.resources.map((res) => ({
+          name: res.name,
+          ResourceAction: {
+            some: {
+              action: res.action,
+              ResourceActionPermission: {
+                some: {
+                  roleId: params.roleId,
+                },
+              },
+            },
+          },
+          ...(res.atb && {
+            ResourceAttribute: {
+              some: {
+                ...res.atb,
+                ResourceAttributeAction: {
+                  some: {
+                    action: res.atb.action,
+                    ResourceAttributeActionPermission: {
+                      some: {
+                        roleId: params.roleId,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          }),
+        })),
+      },
+      include: {
+        ResourceAttribute: {
+          include: {
+            ResourceAttributeAction: {
+              include: {
+                ResourceAttributeActionPermission: {
+                  where: {
+                    roleId: params.roleId,
+                  },
+                },
+              },
+            },
+          },
+        },
+        ResourceAction: {
+          include: {
+            ResourceActionPermission: {
+              where: {
+                roleId: params.roleId,
+              },
+            },
+          },
+        },
+      },
     });
   }
 }

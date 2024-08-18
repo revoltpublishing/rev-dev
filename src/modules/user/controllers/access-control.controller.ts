@@ -5,6 +5,7 @@ import {
   createResourceParamsI,
   resourceActionDependI,
   resourceAttributeI,
+  resourceAttributePermissionsBodyI,
 } from "src/common/interfaces/roles.interface";
 
 @Controller("access-control")
@@ -30,5 +31,18 @@ export class AccessControlController {
   @Post("/resource/action/depends")
   async addResourceActionDepends(@Body() body: resourceActionDependI[]) {
     return await this.accessControlRepo.createResourceActionDepends(body);
+  }
+  @Post("/resource/permissions/list")
+  async getResourcePermissionsForRole(
+    @Body()
+    body: resourceAttributePermissionsBodyI[],
+    @Req()
+    req: Request
+  ) {
+    const { userDetails } = req["context"];
+    return this.accessControlRepo.getResourcesPermission({
+      resources: body,
+      roleId: userDetails.roleId,
+    });
   }
 }
