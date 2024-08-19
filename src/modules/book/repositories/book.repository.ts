@@ -3,11 +3,10 @@ import { DbClient } from "src/common/services/dbclient.service";
 import {
   addBookStageI,
   addManuscriptActivityI,
-  bookI,
   bookUserI,
   createBookI,
-  filterBookI,
   updateBookStageI,
+  updateManuscriptStatusI,
 } from "../interfaces/book.interface";
 import { Prisma } from "@prisma/client";
 import { prismaErrorMapper } from "src/common/mappers/prisma";
@@ -48,10 +47,13 @@ export class BooksRepository {
     });
   }
   async updateBookStage(params: updateBookStageI) {
-    const { id, ...rest } = params;
+    const { bookId, stageId, ...rest } = params;
     return this.dbClient.bookStage.update({
       where: {
-        id,
+        bookId_stageId: {
+          bookId,
+          stageId,
+        },
       },
       data: { ...rest },
     });
@@ -123,6 +125,15 @@ export class BooksRepository {
       where: {
         bkStgManuId: params.mid,
       },
+    });
+  }
+  async updateManuscriptStatus(params: updateManuscriptStatusI) {
+    const { id, ...rest } = params;
+    return this.dbClient.bookStageManuscript.update({
+      where: {
+        id,
+      },
+      data: { ...rest },
     });
   }
 }

@@ -75,7 +75,9 @@ export interface addBookStageReqI {
   requirements: string;
 }
 export interface updateBookStageI {
-  id: string;
+  bookId: string;
+  stage: string;
+  stageId: number;
   isActive?: boolean;
   isAccepted?: boolean;
   isWorking?: boolean;
@@ -91,4 +93,14 @@ export interface addManuscriptActivityI {
   content: string;
   type: number;
   createdBy: string;
+}
+export interface updateManuscriptStatusI {
+  id: string;
+  isSubmitted: boolean;
+  isAccepted: boolean;
+  isActive: boolean;
+}
+export interface bookIdStageParamsI {
+  id: string;
+  stage: string;
 }
