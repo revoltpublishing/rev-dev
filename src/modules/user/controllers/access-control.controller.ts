@@ -13,14 +13,14 @@ export class AccessControlController {
   async ping() {
     return "pong!";
   }
-  @Post("/resource")
-  async createResource(@Body() params: createResourceParamsI) {
-    return await this.accessControlRepo.createResource(params);
-  }
-  @Post("/resource/attribute")
-  async createResourceAttribute(@Body() params: resourceAttributeI) {
-    return await this.accessControlRepo.createResourceAttribute(params);
-  }
+  // @Post("/resource")
+  // async createResource(@Body() params: createResourceParamsI) {
+  //   return await this.accessControlRepo.createResource(params);
+  // }
+  // @Post("/resource/attribute")
+  // async createResourceAttribute(@Body() params: resourceAttributeI) {
+  //   return await this.accessControlRepo.createResourceAttribute(params);
+  // }
 }
 
 // "attribute" : [{

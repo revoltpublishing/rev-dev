@@ -3,13 +3,15 @@ import { BooksRepository } from "../repositories/book.repository";
 import {
   addBookStageReqI,
   addManuscriptActivityI,
+  bookIdStageParamsI,
   createBookI,
   filterBookI,
   updateBookStageI,
+  updateManuscriptStatusI,
 } from "../interfaces/book.interface";
 import { UserService } from "src/modules/user/services/user.service";
 import { BOOK_STAGE_TREE } from "../constants/stage";
-import { StatusCodes } from "src/common/constants/status";
+import { DbExecptions, StatusCodes } from "src/common/constants/status";
 import { BooksService } from "../services/books.service";
 import { GOD__VIEW_ROLES } from "src/modules/user/constants/roles";
 
@@ -68,7 +70,7 @@ export class BookController {
   }
 
   @Get("/:id/:stage")
-  async getBookById(@Param() params: { id: string; stage: string }) {
+  async getBookById(@Param() params: bookIdStageParamsI) {
     return await this.booksService.getBookWithDraftImage(
       await this.booksRepo.getBookById({
         id: params.id,
@@ -92,24 +94,46 @@ export class BookController {
     }
     return this.booksRepo.addBookStageDetails({ ...body, stageId: stgD.id });
   }
-  @Put("/:id/stage")
-  updateBookStage(@Param("id") id: string, @Body() body: updateBookStageI) {
-    return this.booksRepo.updateBookStage({ ...body, id });
+  @Put("/:id/stage/:stage")
+  updateBookStage(
+    @Param()
+    params: bookIdStageParamsI,
+    @Body() body: updateBookStageI
+  ) {
+    const stg = BOOK_STAGE_TREE.find((v) => v.stage === params.stage);
+    if (!stg) {
+      throw DbExecptions.DOESNOT_EXISTS("Stage");
+    }
+    return this.booksRepo.updateBookStage({
+      ...body,
+      stageId: stg.id,
+      bookId: params.id,
+    });
   }
   @Get("/stage/:id")
   async getBookStageDetails(@Param() params: { id: string }) {
-    const bk = await this.booksRepo.getBookStageById({ id: params.id });
+    return await this.booksRepo.getBookStageById({ id: params.id });
   }
   @Get("/:id/stage/all")
   getBookStages(@Param() params: { id: string }) {
     return this.booksRepo.getBookStages({ bookId: params.id });
   }
   @Get("/manuscript/:mid/activity")
-  getManuscriptActivities(@Param("id") id: string) {
-    return this.booksRepo.getManuscriptActivityById({ mid: id });
+  getManuscriptActivities(@Param("mid") mid: string) {
+    return this.booksRepo.getManuscriptActivityById({ mid });
   }
   @Post("/manuscript/activity")
   addManuscriptActivity(@Body() body: addManuscriptActivityI) {
     return this.booksRepo.addManuscriptActivity(body);
+  }
+  @Put("/manuscript/:mid")
+  updateBookStageManuscriptStatus(
+    @Param("mid") mid: string,
+    @Body() body: updateManuscriptStatusI
+  ) {
+    return this.booksRepo.updateManuscriptStatus({
+      id: mid,
+      ...body,
+    });
   }
 }
