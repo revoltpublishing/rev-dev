@@ -3,10 +3,8 @@ import { DbClient } from "src/common/services/dbclient.service";
 import {
   addBookStageI,
   addManuscriptActivityI,
-  bookI,
   bookUserI,
   createBookI,
-  filterBookI,
   updateBookStageI,
 } from "../interfaces/book.interface";
 import { Prisma } from "@prisma/client";
@@ -94,10 +92,11 @@ export class BooksRepository {
       },
     });
   }
-  async getUserBooks(params: { userId: string }) {
+  async getUserBook(params: { userId: string; bookId?: string }) {
     return this.dbClient.bookUserMap.findMany({
       where: {
         userId: params.userId,
+        ...(params.bookId && { bookId: params.bookId }),
       },
       orderBy: {
         createdAt: "asc",

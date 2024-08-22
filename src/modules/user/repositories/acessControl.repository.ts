@@ -221,7 +221,7 @@ export class AccessControlRepository {
   }
   getResourceAttributesInfo(params: {
     rescId: number;
-    atb: {
+    atb?: {
       name: string;
       value: string;
     };
@@ -230,8 +230,7 @@ export class AccessControlRepository {
   }) {
     return this.dbClient.resourceAttribute.findFirst({
       where: {
-        name: params.atb.name,
-        value: params.atb.value,
+        ...(params.atb && { name: params.atb.name, value: params.atb.value }),
         resourceId: params.rescId,
       },
       include: {

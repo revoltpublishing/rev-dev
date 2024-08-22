@@ -4,7 +4,7 @@ import {
   Injectable,
   Logger,
 } from "@nestjs/common";
-import { AccessControlRepository } from "src/modules/user/repositories/acess-control.repository";
+import { AccessControlRepository } from "src/modules/user/repositories/acessControl.repository";
 import { CommonExceptions } from "../constants/status";
 
 @Injectable()

@@ -41,6 +41,7 @@ export class UserFilterObject {
         Image: {},
       },
     },
+    Role: {},
   };
   userSelectObject: Prisma.UserSelect = {
     id: true,
