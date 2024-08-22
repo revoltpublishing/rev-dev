@@ -7,7 +7,7 @@ import {
 import { AuthService } from "src/modules/user/services/auth.service";
 import { CommonExceptions } from "../constants/status";
 import { ACTION_TYPES } from "../constants/action";
-import { AccessControlRepository } from "src/modules/user/repositories/acess-control.repository";
+import { AccessControlRepository } from "src/modules/user/repositories/acessControl.repository";
 import {
   RESOURCE__DATA_TYPE,
   RESOURCE_ATTRIB_DATA_TYPE,
@@ -16,12 +16,14 @@ import {
 @Injectable()
 export class AccessMiddleware implements NestMiddleware {
   constructor(
-    private readonly authService: AuthService,
     private readonly logger: Logger,
+    private readonly authService: AuthService,
     private readonly accessControlRepo: AccessControlRepository
   ) {}
   async use(req: Request, res: Response, next: () => void) {
     this.logger.log("in mid!");
+    // flag to put if authorized finally or not and check in interceptor
+    req["context"] = {};
     const reqContext = req["context"];
     try {
       const accessToken: string = req.headers["authorization"] as string;
@@ -37,6 +39,10 @@ export class AccessMiddleware implements NestMiddleware {
         name: string;
         value: string;
       } = req.headers["atb"] ? JSON.parse(req.headers["atb"]) : undefined;
+      console.log(resc, act, atb);
+      const accessPayload = req.headers["accessPayload"]
+        ? JSON.parse(req.headers["accessPayload"])
+        : undefined;
       if (!userDetails) {
         throw CommonExceptions.INVALID_ACCESS_TOKEN;
       }
@@ -44,7 +50,7 @@ export class AccessMiddleware implements NestMiddleware {
         if (typeof val.action == "string") return val.action === act;
         else return val.action.find((v) => v === act);
       });
-      if (!action) {
+      if (!action || !resc) {
         throw CommonExceptions.INVAID_GENERAL;
       }
       const rescInfo = await this.accessControlRepo.getResourceInfo({
@@ -61,7 +67,11 @@ export class AccessMiddleware implements NestMiddleware {
       ) {
         throw CommonExceptions.ACCESS_NOT_ALLOWED;
       }
-      if (rescInfo.ResourceAction.length === 0) {
+      if (
+        !atb &&
+        (rescInfo.ResourceAction.length === 0 ||
+          rescInfo.ResourceAction?.[0]?.ResourceActionPermission.length === 0)
+      ) {
         throw CommonExceptions.ACCESS_NOT_ALLOWED;
       }
       if (rescInfo.ResourceAction.length > 0) {
@@ -69,20 +79,21 @@ export class AccessMiddleware implements NestMiddleware {
           for (const dp of rescInfo.ResourceAction[0]?.ResourceActionDepend ||
             []) {
             if (dp.type === RESOURCE__DATA_TYPE) {
-              this.authService.checkForDependentResource({
+              await this.authService.checkForDependentResource({
                 name: dp.value,
                 action: action.value,
                 roleId: userDetails.roleId,
-                reqContext: reqContext,
               });
               // return this.resourceGuard.canActivate(context);
               // check if the values exists in that resource and provide needed value
             }
             if (dp.type === RESOURCE_ATTRIB_DATA_TYPE) {
-              reqContext["rescInfo"] = rescInfo;
-              this.authService.checkForDependentResourceAttribute({
+              await this.authService.checkForDependentResourceAttribute({
                 resourceId: rescInfo.id,
-                atb: atb,
+                atb: {
+                  name: dp.value,
+                  value: accessPayload?.[dp.value],
+                },
                 action: action.value,
                 roleId: userDetails.roleId,
               });
@@ -96,10 +107,25 @@ export class AccessMiddleware implements NestMiddleware {
           const perms =
             rescInfo.ResourceAction?.[0]?.ResourceActionPermission?.[0];
           if (perms.isCreated) {
-            req["context"]["_dependencyResource_Part"] = "isCreated";
+            req.headers["_dependencyResource_Part"] = "isCreated";
           }
           if (perms.isIncluded) {
-            req["context"]["_dependencyResource_Part"] = "isIncluded";
+            req.headers["_dependencyResource_Part"] = "isIncluded";
+          }
+        }
+        if (
+          atb &&
+          rescInfo.ResourceAttribute?.[0].ResourceAttributeAction?.[0]
+            .ResourceAttributeActionPermission.length > 0
+        ) {
+          const perms =
+            rescInfo.ResourceAttribute?.[0].ResourceAttributeAction?.[0]
+              .ResourceAttributeActionPermission[0];
+          if (perms.isCreated) {
+            req.headers["_dependencyResource_Part"] = "isCreated";
+          }
+          if (perms.isIncluded) {
+            req.headers["_dependencyResource_Part"] = "isIncluded";
           }
         }
       }
@@ -113,7 +139,7 @@ export class AccessMiddleware implements NestMiddleware {
       if (e instanceof ForbiddenException) {
         throw e; // Re-throw ForbiddenException
       }
-      this.logger.error("Access guard error:", e);
+      this.logger.error("Middleware ERROR:", e);
       throw CommonExceptions.ACCESS_NOT_ALLOWED;
     }
     next();

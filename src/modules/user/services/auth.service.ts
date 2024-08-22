@@ -1,7 +1,7 @@
-import { Injectable, Logger } from "@nestjs/common";
+import { Inject, Injectable, Logger } from "@nestjs/common";
 import { DbClient } from "src/common/services/dbclient.service";
 import { UserFilterObject } from "../constants/filterObjects";
-import { AccessControlRepository } from "../repositories/acess-control.repository";
+import { AccessControlRepository } from "../repositories/acessControl.repository";
 import { CommonExceptions } from "src/common/constants/status";
 
 @Injectable()
@@ -10,7 +10,9 @@ export class AuthService {
     private readonly dbClient: DbClient,
     private readonly accessControlRepo: AccessControlRepository,
     private readonly userFilterObj: UserFilterObject,
-    private readonly logger: Logger
+    private readonly logger: Logger,
+    @Inject("REQUEST")
+    private readonly req: Request
   ) {}
 
   async getUserInfoByAccessToken(params: { token: string }) {
@@ -25,22 +27,21 @@ export class AuthService {
     name: string;
     action: number;
     roleId: number;
-    reqContext: any;
   }) {
-    const { reqContext } = params;
+    // const { reqContext } = params;
     const resD = await this.accessControlRepo.getResourceDetails({
       name: params.name,
       action: params.action,
       roleId: params.roleId,
     });
-    reqContext["_dependencyResource"] = params.name;
+    this.req.headers["_dependencyResource"] = params.name;
     if (resD.ResourceAction[0].ResourceActionPermission[0].isCreated) {
-      reqContext["_dependencyResource_Part"] = "isCreated";
+      this.req.headers["_dependencyResource_Part"] = "isCreated";
     }
     if (resD.ResourceAction[0].ResourceActionPermission[0].isIncluded) {
-      reqContext["_dependencyResource_Part"] = "isIncluded";
+      this.req.headers["_dependencyResource_Part"] = "isIncluded";
     }
-    this.logger.log("request context", reqContext);
+    this.logger.log("request context", this.req.headers);
   }
   async checkForDependentResourceAttribute(params: {
     resourceId: number;
@@ -57,6 +58,7 @@ export class AuthService {
       action: params.action,
       roleId: params.roleId,
     });
+    this.logger.log(resAttrib, "dependent resource attribute");
     if (resAttrib.ResourceAttributeAction.length > 0) {
       const attrb = resAttrib.ResourceAttributeAction?.[0];
       if (attrb.ResourceAttributeActionPermission.length === 0) {

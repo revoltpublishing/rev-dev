@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { User } from "@prisma/client";
 import { S3Service } from "src/common/services/s3.service";
 import { ImagesRepository } from "src/modules/project/repositories/image.repository";
-import { AccessControlRepository } from "../repositories/acess-control.repository";
+import { AccessControlRepository } from "../repositories/acessControl.repository";
 
 @Injectable()
 export class UserService {

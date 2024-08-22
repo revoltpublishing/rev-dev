@@ -10,15 +10,15 @@ import { DraftController } from "./controllers/draft.controller";
 import { BooksService } from "./services/books.service";
 import { DraftRepository } from "./repositories/draft.repository";
 import { DraftService } from "./services/draft.service";
-import { AccessControlRepository } from "../user/repositories/acess-control.repository";
+import { AccessControlRepository } from "../user/repositories/acessControl.repository";
 import { UserFilterObject } from "../user/constants/filterObjects";
 import { UsersRepository } from "../user/repositories/user.repository";
 import { UsersModule } from "../user/user.module";
-import { AccessGuard } from "src/common/guards/access.guard";
 import {
   ResourceAttributeGuard,
   ResourceGuard,
 } from "src/common/guards/resource.guard";
+import { BookUserMapIncludeGuard } from "./guards/bookUserMapInc.guard";
 
 @Module({
   controllers: [BookController, DraftController],
@@ -34,9 +34,9 @@ import {
     AccessControlRepository,
     UserFilterObject,
     UsersRepository,
-    AccessGuard,
     ResourceAttributeGuard,
     ResourceGuard,
+    BookUserMapIncludeGuard,
     Logger,
   ],
   exports: [BooksRepository],

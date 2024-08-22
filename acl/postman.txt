@@ -53,21 +53,21 @@ INSERT INTO "RoleMaster" (id, "role") VALUES
 }
 
 {           
-            "resourceId" : 7,
-            "name" : "role",
-            "value" : "DESIGNER",
-            "action": {
-                    "action" : 0,
-                    "permissions" : [
-                        {
-                            "roleId" : 990
-                        }, {
-                            "roleId" : 991
-                        }, {
-                            "roleId" : 992
-                        }
-                    ]
-                }
+  "resourceId" : 7,
+  "name" : "role",
+  "value" : "DESIGNER",
+  "action": {
+          "action" : 0,
+          "permissions" : [
+              {
+                  "roleId" : 990
+              }, {
+                  "roleId" : 991
+              }, {
+                  "roleId" : 992
+              }
+          ]
+      }
             
 }
 
@@ -81,3 +81,54 @@ INSERT INTO "RoleMaster" (id, "role") VALUES
         "81bac5d1-68b5-44a0-bd91-1cb33d434962",
         "1a43357a-19c3-40f1-aa79-dc50a6b93828"
     ]
+
+{
+  "resourceId": 9,
+  "name": "api",
+  "value": "list",
+  "action": {
+    "action": 1,
+    "permissions": [
+      {
+        "roleId": 990
+      },{
+        "roleId": 991
+      },{
+        "roleId": 992,
+        "isIncluded" : true
+      },{
+        "roleId": 993,
+        "isIncluded" : true
+      },{
+        "roleId": 994,
+        "isIncluded" : true
+      },{
+        "roleId": 995,
+        "isIncluded" : true
+      }
+    ]
+  }
+}
+{
+  "resourceId": 9,
+    "action": 1,
+    "permissions": [
+      {
+        "roleId": 990
+      },{
+        "roleId": 991
+      },{
+        "roleId": 992,
+        "isIncluded" : true
+      },{
+        "roleId": 993,
+        "isIncluded" : true
+      },{
+        "roleId": 994,
+        "isIncluded" : true
+      },{
+        "roleId": 995,
+        "isIncluded" : true
+      }
+    ]
+}
