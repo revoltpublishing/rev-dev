@@ -7,6 +7,7 @@ import {
   Param,
   Post,
   Put,
+  Query,
   Req,
   UseGuards,
 } from "@nestjs/common";
@@ -110,13 +111,13 @@ export class BookController {
 
   @Get("/:id")
   @UseGuards(BookUserMapIncludeGuard)
-  async getBookById(@Param() params: { id: string }) {
+  async getBookById(@Param() params: { id: string }, @Query() stage: String) {
     return await this.booksService.getBookWithDraftImage(
       await this.booksRepo.getBookById({
         id: params.id,
         stageId:
-          params.stage !== "null"
-            ? BOOK_STAGE_TREE.find((bk) => bk.stage === params.stage).id
+          stage !== "null"
+            ? BOOK_STAGE_TREE.find((bk) => bk.stage === stage).id
             : undefined,
       })
     );
