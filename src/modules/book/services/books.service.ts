@@ -7,12 +7,13 @@ import {
   buildCreateBookObjectI,
   createBookI,
   createBookReqI,
-  filterBookI,
+  filterBookRepoI,
 } from "../interfaces/book.interface";
 import { BooksRepository } from "../repositories/book.repository";
 import { BOOK_STAGE_TREE } from "../constants/stage";
 import { UserService } from "src/modules/user/services/user.service";
 import { UserFilterObject } from "src/modules/user/constants/filterObjects";
+import { UsersRepository } from "src/modules/user/repositories/user.repository";
 
 @Injectable()
 export class BooksService {
@@ -64,7 +65,7 @@ export class BooksService {
     }
     return obj;
   }
-  buildFindManyFilterObject(params: filterBookI): Prisma.BookFindManyArgs {
+  buildFindManyFilterObject(params: filterBookRepoI): Prisma.BookFindManyArgs {
     const obj: Prisma.BookFindManyArgs = {
       where: {},
       include: {
@@ -116,10 +117,10 @@ export class BooksService {
     return obj;
   }
 
-  async getFilteredBooks(params: filterBookI) {
+  async getFilteredBooks(params: filterBookRepoI) {
     return this.bookRepo.getBooks(this.buildFindManyFilterObject(params));
   }
-  async getFilteredBooksCount(params: filterBookI) {
+  async getFilteredBooksCount(params: filterBookRepoI) {
     return this.bookRepo.getBooksCount(
       this.buildFindManyFilterObject({ ...params })
     );

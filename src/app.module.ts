@@ -1,4 +1,5 @@
 import {
+  Logger,
   MiddlewareConsumer,
   Module,
   NestModule,
@@ -8,8 +9,7 @@ import { UsersModule } from "./modules/user/user.module";
 import { ProjectModule } from "./modules/project/project.module";
 import { ConfigModule } from "@nestjs/config";
 import { BookModule } from "./modules/book/book.module";
-import { AccessMiddleware } from "./common/middlewares/userinfo.middleware";
-
+import { AccessMiddleware } from "./common/middlewares/access.middleware";
 const AppEnvironmentModule = ConfigModule.forRoot({
   envFilePath: "./.env",
   isGlobal: true,
@@ -18,7 +18,7 @@ const AppEnvironmentModule = ConfigModule.forRoot({
 @Module({
   imports: [UsersModule, ProjectModule, BookModule, AppEnvironmentModule],
   controllers: [],
-  providers: [],
+  providers: [Logger],
   exports: [],
 })
 export class AppModule implements NestModule {
@@ -27,7 +27,17 @@ export class AppModule implements NestModule {
       .apply(AccessMiddleware)
       .exclude(
         { path: "access-control/ping", method: RequestMethod.ALL },
-        { path: "users/add", method: RequestMethod.POST }
+        { path: "access-control/resource", method: RequestMethod.ALL },
+        { path: "access-control/resource/action", method: RequestMethod.ALL },
+        {
+          path: "access-control/resource/action/depends",
+          method: RequestMethod.ALL,
+        },
+        {
+          path: "access-control/resource/attribute",
+          method: RequestMethod.ALL,
+        },
+        { path: "access-control/permissions/list", method: RequestMethod.POST }
       )
       .forRoutes({
         path: "*",

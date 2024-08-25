@@ -1,4 +1,5 @@
 import { Prisma } from "@prisma/client";
+import { interAccessPayloadI } from "src/common/interfaces/access.interface";
 
 export interface bookI {
   title: string;
@@ -40,7 +41,7 @@ export interface uploadImageReqI {
   s3Path: string;
   mimeType: string;
 }
-export interface filterBookI {
+export interface filterBookRepoI {
   search: string;
   stageId: number;
   stage: string;
@@ -48,9 +49,13 @@ export interface filterBookI {
   pg: number;
   userId: string;
 }
+export interface filterBookI extends filterBookRepoI {
+  internalAccessPayload: interAccessPayloadI;
+}
+
 export interface buildFilterBookI
   extends Prisma.BookFindManyArgs,
-    filterBookI {}
+    filterBookRepoI {}
 
 export type getManyResponse = Prisma.BookUserMapGetPayload<{
   include: {

@@ -1,8 +1,8 @@
 import { Prisma } from "@prisma/client";
-import { filterUserI } from "../interfaces/user.interface";
+import { filterUserI, filterUserRepoI } from "../interfaces/user.interface";
 
 export class UserFilterObject {
-  buildFilterObject(params?: filterUserI): Prisma.UserFindManyArgs {
+  buildFilterObject(params?: filterUserRepoI): Prisma.UserFindManyArgs {
     const obj: Prisma.UserFindManyArgs = {
       select: {
         ...this.userSelectObject,
@@ -27,6 +27,9 @@ export class UserFilterObject {
           },
         ];
       }
+      if (params.createdBy) {
+        obj.where.createdBy = params.createdBy;
+      }
       if (params.roleId) obj.where = { ...obj.where, roleId: params.roleId };
     }
     return obj;
@@ -38,6 +41,7 @@ export class UserFilterObject {
         Image: {},
       },
     },
+    Role: {},
   };
   userSelectObject: Prisma.UserSelect = {
     id: true,

@@ -1,4 +1,15 @@
-import { Body, Controller, Get, Param, Post, Put, Req } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Get,
+  HttpStatus,
+  Logger,
+  Param,
+  Post,
+  Put,
+  Req,
+  UseGuards,
+} from "@nestjs/common";
 import { BooksRepository } from "../repositories/book.repository";
 import {
   addBookStageReqI,
@@ -11,39 +22,64 @@ import {
 } from "../interfaces/book.interface";
 import { UserService } from "src/modules/user/services/user.service";
 import { BOOK_STAGE_TREE } from "../constants/stage";
-import { DbExecptions, StatusCodes } from "src/common/constants/status";
+import { DbExecptions } from "src/common/constants/status";
+import { CommonExceptions } from "src/common/constants/status";
 import { BooksService } from "../services/books.service";
-import { GOD__VIEW_ROLES } from "src/modules/user/constants/roles";
+import { userRoleInitCount } from "src/modules/user/constants/roles";
+import { UsersRepository } from "src/modules/user/repositories/user.repository";
+import { BookUserMapIncludeGuard } from "../guards/bookUserMapInc.guard";
+import { UserResourceIncludeGuard } from "src/modules/user/gaurds/userInc.guard";
+import { DataResponse } from "src/common/constants/http/response";
+import { DataResponseMessages } from "src/common/constants/messages";
 
 @Controller("books")
 export class BookController {
   constructor(
     private readonly booksRepo: BooksRepository,
     private readonly usersService: UserService,
-    private readonly booksService: BooksService
+    private readonly booksService: BooksService,
+    private readonly usersRepo: UsersRepository
   ) {}
-  @Post("/add")
-  addBook(@Body() body: createBookI, @Req() req: Request) {
+  @Post()
+  async add(@Body() body: createBookI, @Req() req: Request) {
     const { userDetails } = req["context"];
-    return this.booksService.createBookWithInitStages({
+    const bookUsersMap = new Map(Object.entries(userRoleInitCount));
+    for (const buId of body.bookUsers) {
+      const ud = await this.usersRepo.getUserById({ id: buId });
+      bookUsersMap.set(ud.Role.role, 1);
+    }
+    Object.keys(bookUsersMap).forEach((k) => {
+      if (bookUsersMap[k] === 0) throw CommonExceptions.MISSING_FIELD(k);
+    });
+    const bk = await this.booksService.createBookWithInitStages({
       ...body,
       createdBy: userDetails.id,
     });
+    return new DataResponse(
+      HttpStatus.CREATED,
+      DataResponseMessages.CREATED_SUCCESSFULLY,
+      bk
+    );
   }
 
   // filtering based on role required
-  @Post("/lookup")
+  @Post("/list")
+  @UseGuards(UserResourceIncludeGuard)
   async list(@Body() body: filterBookI, @Req() req: Request) {
-    const { userDetails } = req["context"];
-    if (!GOD__VIEW_ROLES.includes(userDetails.roleId)) {
-      body.userId = userDetails.id;
-    }
+    const { internalAccessPayload } = body;
+    console.log(internalAccessPayload, "ddkdkdkd");
     if (body.stage) {
       const stgd = BOOK_STAGE_TREE.find((bk) => bk.stage === body.stage);
       body.stageId = stgd.id;
     }
-    const list = await this.booksService.getFilteredBooks({ ...body });
-    const count = await this.booksService.getFilteredBooksCount({ ...body });
+    const list = await this.booksService.getFilteredBooks({
+      ...body,
+      ...internalAccessPayload,
+    });
+    const count = await this.booksService.getFilteredBooksCount({
+      ...body,
+      ...internalAccessPayload,
+    });
     const listRes = await Promise.all(
       list.map(async (ls) => {
         const obj = { ...ls };
@@ -66,11 +102,15 @@ export class BookController {
         return obj;
       })
     );
-    return { count, list: listRes };
+    return new DataResponse(HttpStatus.ACCEPTED, "list", {
+      count,
+      list: listRes,
+    });
   }
 
-  @Get("/:id/:stage")
-  async getBookById(@Param() params: bookIdStageParamsI) {
+  @Get("/:id")
+  @UseGuards(BookUserMapIncludeGuard)
+  async getBookById(@Param() params: { id: string }) {
     return await this.booksService.getBookWithDraftImage(
       await this.booksRepo.getBookById({
         id: params.id,
@@ -89,7 +129,7 @@ export class BookController {
     if (stgD.prevId !== null) {
       stgD.prevId.forEach((st) => {
         const bkStage = bkStgs.find((bkStg) => bkStg.stageId === st);
-        if (!bkStage) throw StatusCodes.INVALID_BOOK_STAGE_REDIRECTION;
+        if (!bkStage) throw CommonExceptions.INVALID_BOOK_STAGE_REDIRECTION;
       });
     }
     return this.booksRepo.addBookStageDetails({ ...body, stageId: stgD.id });

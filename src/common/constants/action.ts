@@ -1,18 +1,10 @@
 export const ACTION_TYPES: { action: string[] | string; value: number }[] = [
   {
-    action: "DELETE",
-    value: 3,
-  },
-  {
-    action: ["GET", "READ"],
+    action: ["CREATE", "POST", "DELETE"],
     value: 0,
   },
   {
-    action: ["CREATE", "POST"],
+    action: ["GET", "READ", "LIST"],
     value: 1,
-  },
-  {
-    action: ["UPDATE", "PATCH", "EDIT"],
-    value: 2,
   },
 ];

@@ -1,5 +1,9 @@
 import { Injectable, Logger } from "@nestjs/common";
-import { filterUserI, UserI } from "../interfaces/user.interface";
+import {
+  filterUserI,
+  filterUserRepoI,
+  UserI,
+} from "../interfaces/user.interface";
 import { DbClient } from "src/common/services/dbclient.service";
 import { prismaErrorMapper } from "src/common/mappers/prisma";
 import { Prisma } from "@prisma/client";
@@ -35,12 +39,12 @@ export class UsersRepository {
     });
   }
 
-  async getUsers(params: filterUserI) {
+  async getUsers(params: filterUserRepoI) {
     return this.dbClient.user.findMany({
       ...this.userFilterObj.buildFilterObject(params),
     });
   }
-  async getUsersCount(params: filterUserI) {
+  async getUsersCount(params: filterUserRepoI) {
     params.offset = undefined;
     params.pg = undefined;
     const res = await this.dbClient.user.findMany({

@@ -105,10 +105,11 @@ export class BooksRepository {
       },
     });
   }
-  async getUserBooks(params: { userId: string }) {
+  async getUserBook(params: { userId: string; bookId?: string }) {
     return this.dbClient.bookUserMap.findMany({
       where: {
         userId: params.userId,
+        ...(params.bookId && { bookId: params.bookId }),
       },
       orderBy: {
         createdAt: "asc",

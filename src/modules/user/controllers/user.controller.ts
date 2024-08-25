@@ -2,11 +2,12 @@ import {
   Body,
   Controller,
   Get,
+  HttpStatus,
   Post,
+  Req,
   UseGuards,
   UsePipes,
 } from "@nestjs/common";
-import { LoggedInGuard } from "src/common/guards/loggedin.guard";
 import { createUserI, filterUserI } from "../interfaces/user.interface";
 import { UsersRepository } from "../repositories/user.repository";
 import { PayloadValidationPipe } from "src/common/pipes/payload.pipe";
@@ -14,9 +15,10 @@ import { createUserReqSchema } from "../validationSchema/user";
 import { generateRandomPassword } from "src/common/helpers/generatePassword";
 import { BooksRepository } from "src/modules/book/repositories/book.repository";
 import { DbExecptions, MessageError } from "src/common/constants/status";
-import { AccessControlRepository } from "../repositories/acess-control.repository";
+import { AccessControlRepository } from "../repositories/acessControl.repository";
 import { UserService } from "../services/user.service";
-import { User } from "@prisma/client";
+import { DataResponse } from "src/common/constants/http/response";
+import { UserResourceIncludeGuard } from "../gaurds/userInc.guard";
 
 @Controller("users")
 export class UserController {
@@ -27,10 +29,11 @@ export class UserController {
     private readonly usersService: UserService
   ) {}
 
-  @Post("/add")
+  @Post()
   @UsePipes(new PayloadValidationPipe(createUserReqSchema))
-  async add(@Body() body: createUserI) {
+  async add(@Body() body: createUserI, @Req() req: Request) {
     const { role, ...rest } = body;
+    const { userDetails } = req["context"];
     const roleD = await this.accessControlRepo.getRoleInfoByRole({ role });
     const password = generateRandomPassword();
     if (!roleD) {
@@ -40,25 +43,25 @@ export class UserController {
       ...rest,
       password,
       roleId: roleD.id,
+      createdBy: userDetails.id,
     });
-    if (body.bookId && typeof ud !== "string") {
+    if (body.bookId) {
       this.booksRepo.addUserToBook({
         bookId: body.bookId,
         userId: ud.id,
       });
     }
     ud.password = "";
-    return { message: "created successfully", user: ud };
+    return new DataResponse(HttpStatus.CREATED, "created successfully", ud);
   }
   @Get("/here")
-  @UseGuards(LoggedInGuard)
   async here() {
     return "here";
   }
-  @Post("/lookup")
+  @Post("/list")
+  @UseGuards(UserResourceIncludeGuard)
   async list(@Body() body: filterUserI) {
-    let list: User[];
-    let count: number;
+    const { internalAccessPayload } = body;
     if (body.role) {
       const roleId = (
         await this.accessControlRepo.getRoleInfoByRole({ role: body.role })
@@ -66,19 +69,27 @@ export class UserController {
       body.roleId = roleId;
     }
     try {
-      Promise.all([
-        (list = await this.usersRepo.getUsers({ ...body })),
-        (count = await this.usersRepo.getUsersCount({ ...body })),
+      const [list, count] = await Promise.all([
+        this.usersRepo.getUsers({
+          ...body,
+          ...internalAccessPayload,
+        }),
+        this.usersRepo.getUsersCount({
+          ...body,
+          ...internalAccessPayload,
+        }),
       ]);
       const listRes = await Promise.all(
         list.map((v) => this.usersService.getUserWithImage({ user: v }))
       );
       const res = await Promise.all(
         listRes.map(async (v) => {
-          const role = await this.accessControlRepo.getRoleInfoById({
-            id: v.roleId,
-          });
-          const bkLst = await this.booksRepo.getUserBooks({ userId: v.id });
+          const [role, bkLst] = await Promise.all([
+            this.accessControlRepo.getRoleInfoById({
+              id: v.roleId,
+            }),
+            this.booksRepo.getUserBook({ userId: v.id }),
+          ]);
           return {
             ...v,
             role: role.role,
@@ -87,7 +98,10 @@ export class UserController {
           };
         })
       );
-      return { count, list: res };
+      return new DataResponse(HttpStatus.FOUND, "list", {
+        count,
+        list: res,
+      });
     } catch (e) {
       throw new MessageError(e);
     }

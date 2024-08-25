@@ -58,3 +58,14 @@ export {
   USER_ROLE__PM,
   USER_ROLE__TS,
 };
+
+export const userRoleInitCount = {
+  [USER_ROLE__AT]: 0,
+  [USER_ROLE__DS]: 0,
+  [USER_ROLE__PM]: 0,
+  [USER_ROLE__TS]: 0,
+};
+
+const RESOURCE__DATA_TYPE = "resc";
+const RESOURCE_ATTRIB_DATA_TYPE = "attrib";
+export { RESOURCE__DATA_TYPE, RESOURCE_ATTRIB_DATA_TYPE };

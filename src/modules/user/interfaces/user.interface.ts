@@ -1,3 +1,5 @@
+import { interAccessPayloadI } from "src/common/interfaces/access.interface";
+
 export interface UserI {
   firstName: string;
   lastName: string;
@@ -21,10 +23,14 @@ export interface createUserI {
   roleId: number;
   bookId?: string;
 }
-export interface filterUserI {
+export interface filterUserI extends filterUserRepoI {
+  internalAccessPayload?: interAccessPayloadI;
+}
+export interface filterUserRepoI {
   search: string;
   role: string;
   roleId: number;
   offset: number;
   pg: number;
+  createdBy: string;
 }

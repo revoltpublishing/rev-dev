@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus } from "@nestjs/common";
+import { ForbiddenException, HttpException, HttpStatus } from "@nestjs/common";
 
 export class MessageError extends Error {
   status: number;
@@ -9,7 +9,7 @@ export class MessageError extends Error {
   }
 }
 
-export class StatusCodes {
+export class CommonExceptions {
   public static readonly INVALID_ACCESS_TOKEN = new HttpException(
     "Access Token is invalid",
     HttpStatus.UNAUTHORIZED
@@ -18,14 +18,18 @@ export class StatusCodes {
     "Action is invalid",
     HttpStatus.UNAUTHORIZED
   );
-  public static readonly ACCESS_NOT_ALLOWED = new HttpException(
-    "You are not allowed",
-    HttpStatus.NOT_ACCEPTABLE
+  public static readonly ACCESS_NOT_ALLOWED = new ForbiddenException(
+    "You are not allowed to perform this action"
   );
   public static readonly INVALID_BOOK_STAGE_REDIRECTION = new HttpException(
     "Book can't move to the provided state, as it has dependency on some other stages",
     HttpStatus.NOT_ACCEPTABLE
   );
+  public static readonly MISSING_FIELD = (args: string) =>
+    new HttpException(
+      `${args} type of value is missing`,
+      HttpStatus.NOT_ACCEPTABLE
+    );
 }
 export class DbStatusCodes {
   public static readonly MOBILE_ALREADY_OCCUPIED = {
