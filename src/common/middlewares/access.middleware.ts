@@ -24,7 +24,6 @@ export class AccessMiddleware implements NestMiddleware {
     this.logger.log("in mid!");
     // flag to put if authorized finally or not and check in interceptor
     req["context"] = {};
-    const reqContext = req["context"];
     try {
       const accessToken: string = req.headers["authorization"] as string;
       if (!accessToken) {
@@ -79,11 +78,18 @@ export class AccessMiddleware implements NestMiddleware {
           for (const dp of rescInfo.ResourceAction[0]?.ResourceActionDepend ||
             []) {
             if (dp.type === RESOURCE__DATA_TYPE) {
-              await this.authService.checkForDependentResource({
-                name: dp.value,
-                action: action.value,
-                roleId: userDetails.roleId,
-              });
+              req.headers["_dependencyResource"] = dp.value;
+              if (
+                rescInfo.ResourceAction[0].ResourceActionPermission[0].isCreated
+              ) {
+                req.headers["_dependencyResource_Part"] = "isCreated";
+              }
+              if (
+                rescInfo.ResourceAction[0].ResourceActionPermission[0]
+                  .isIncluded
+              ) {
+                req.headers["_dependencyResource_Part"] = "isIncluded";
+              }
               // return this.resourceGuard.canActivate(context);
               // check if the values exists in that resource and provide needed value
             }

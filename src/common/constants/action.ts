@@ -7,4 +7,5 @@ export const ACTION_TYPES: { action: string[] | string; value: number }[] = [
     action: ["GET", "READ", "LIST"],
     value: 1,
   },
+  { action: ["EDIT"], value: 2 },
 ];
