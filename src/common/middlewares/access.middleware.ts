@@ -33,29 +33,24 @@ export class AccessMiddleware implements NestMiddleware {
         token: accessToken,
       });
       const resc: string = req.headers["resource"];
-      const act: string = req.headers["action"] || req.method;
+      const act = parseInt(req.headers["action"]);
       const atb: {
         name: string;
         value: string;
       } = req.headers["atb"] ? JSON.parse(req.headers["atb"]) : undefined;
-      console.log(resc, act, atb);
       const accessPayload = req.headers["accessPayload"]
         ? JSON.parse(req.headers["accessPayload"])
         : undefined;
       if (!userDetails) {
         throw CommonExceptions.INVALID_ACCESS_TOKEN;
       }
-      const action = ACTION_TYPES.find((val) => {
-        if (typeof val.action == "string") return val.action === act;
-        else return val.action.find((v) => v === act);
-      });
-      if (!action || !resc) {
+      if (!act || !resc) {
         throw CommonExceptions.INVAID_GENERAL;
       }
       const rescInfo = await this.accessControlRepo.getResourceInfo({
         resc,
         roleId: userDetails.roleId,
-        action: action.value,
+        action: act,
         attribute: atb,
       });
       this.logger.log(rescInfo, "Resources of user!");
@@ -100,7 +95,7 @@ export class AccessMiddleware implements NestMiddleware {
                   name: dp.value,
                   value: accessPayload?.[dp.value],
                 },
-                action: action.value,
+                action: act,
                 roleId: userDetails.roleId,
               });
               // return this.resourceAccessGuard.canActivate(context);
@@ -139,7 +134,7 @@ export class AccessMiddleware implements NestMiddleware {
         userDetails,
         resc,
         atb,
-        action,
+        act,
       };
     } catch (e) {
       if (e instanceof ForbiddenException) {
