@@ -32,7 +32,7 @@ export class AccessControlController {
   async addResourceActionDepends(@Body() body: resourceActionDependI[]) {
     return await this.accessControlRepo.createResourceActionDepends(body);
   }
-  @Post("/resource/permissions/list")
+  @Post("/resource/permission/list")
   async getResourcePermissionsForRole(
     @Body()
     body: resourceAttributePermissionsBodyI[],
