@@ -300,7 +300,8 @@ export class AccessControlRepository {
           ...(res.atb && {
             ResourceAttribute: {
               some: {
-                ...res.atb,
+                name: res.atb.name,
+                value: res.atb.value,
                 ResourceAttributeAction: {
                   some: {
                     action: res.atb.action,
@@ -317,19 +318,36 @@ export class AccessControlRepository {
         })),
       },
       include: {
-        ResourceAttribute: {
-          include: {
-            ResourceAttributeAction: {
+        ResourceAttribute: params.resources.some((res) => res.atb)
+          ? {
+              where: {
+                OR: params.resources
+                  .filter((res) => res.atb)
+                  .map((res) => ({
+                    name: res.atb.name,
+                    value: res.atb.value,
+                  })),
+              },
               include: {
-                ResourceAttributeActionPermission: {
+                ResourceAttributeAction: {
                   where: {
-                    roleId: params.roleId,
+                    OR: params.resources
+                      .filter((res) => res.atb)
+                      .map((res) => ({
+                        action: res.action,
+                      })),
+                  },
+                  include: {
+                    ResourceAttributeActionPermission: {
+                      where: {
+                        roleId: params.roleId,
+                      },
+                    },
                   },
                 },
               },
-            },
-          },
-        },
+            }
+          : undefined,
         ResourceAction: {
           include: {
             ResourceActionPermission: {
