@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Req } from "@nestjs/common";
+import { Body, Controller, Get, Post, Req, UseGuards } from "@nestjs/common";
 import { AccessControlRepository } from "../repositories/acessControl.repository";
 import {
   createResourceActionI,
@@ -7,6 +7,7 @@ import {
   resourceAttributeI,
   resourceAttributePermissionsBodyI,
 } from "src/common/interfaces/roles.interface";
+import { AccessGuard } from "src/common/guards/access.guard";
 
 @Controller("access-control")
 export class AccessControlController {
@@ -33,6 +34,7 @@ export class AccessControlController {
     return await this.accessControlRepo.createResourceActionDepends(body);
   }
   @Post("/resource/permission/list")
+  @UseGuards(AccessGuard)
   async getResourcePermissionsForRole(
     @Body()
     body: resourceAttributePermissionsBodyI[],
