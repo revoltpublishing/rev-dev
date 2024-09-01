@@ -1,6 +1,6 @@
 export interface createResourceParamsI {
   name: string;
-  action: resourceActionI;
+  action?: resourceActionI;
 }
 export interface resourceActionI {
   action: number;

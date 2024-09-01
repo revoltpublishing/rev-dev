@@ -26,19 +26,21 @@ export class AccessControlRepository {
     return this.dbClient.resource.create({
       data: {
         name,
-        ResourceAction: {
-          create: {
-            action: params.action.action,
-            ResourceActionPermission: {
-              create: params.action.permissions,
-            },
-            ...(params.action.depends && {
-              ResourceActionDepend: {
-                create: params.action.depends,
+        ...(params.action && {
+          ResourceAction: {
+            create: {
+              action: params.action.action,
+              ResourceActionPermission: {
+                create: params.action.permissions,
               },
-            }),
+              ...(params.action.depends && {
+                ResourceActionDepend: {
+                  create: params.action.depends,
+                },
+              }),
+            },
           },
-        },
+        }),
       },
       include: {
         ResourceAction: {},
