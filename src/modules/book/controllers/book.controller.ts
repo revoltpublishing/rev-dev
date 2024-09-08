@@ -3,7 +3,6 @@ import {
   Controller,
   Get,
   HttpStatus,
-  Logger,
   Param,
   Post,
   Put,
@@ -111,19 +110,21 @@ export class BookController {
 
   @Get("/:id")
   @UseGuards(BookUserMapIncludeGuard)
-  async getBookById(@Param() params: { id: string }, @Query() stage: String) {
+  async getBookById(
+    @Param() params: { id: string },
+    @Query() query: { stage: string }
+  ) {
     return await this.booksService.getBookWithDraftImage(
       await this.booksRepo.getBookById({
         id: params.id,
-        stageId:
-          stage !== "null"
-            ? BOOK_STAGE_TREE.find((bk) => bk.stage === stage).id
-            : undefined,
+        stageId: query.stage
+          ? BOOK_STAGE_TREE.find((bk) => bk.stage === query.stage).id
+          : undefined,
       })
     );
   }
   // changes for bk stage to book id and stage name
-  @Post("/:id/stage/add")
+  @Post("/:id/stage")
   async addBookStage(@Param("id") id: string, @Body() body: addBookStageReqI) {
     const bkStgs = await this.booksRepo.getBookStages({ bookId: id });
     const stgD = BOOK_STAGE_TREE.find((st) => st.stage === body.stage);
@@ -136,6 +137,7 @@ export class BookController {
     return this.booksRepo.addBookStageDetails({ ...body, stageId: stgD.id });
   }
   @Put("/:id/stage/:stage")
+  @UseGuards(BookUserMapIncludeGuard)
   updateBookStage(
     @Param()
     params: bookIdStageParamsI,
@@ -152,6 +154,7 @@ export class BookController {
     });
   }
   @Get("/stage/:id")
+  @UseGuards(BookUserMapIncludeGuard)
   async getBookStageDetails(@Param() params: { id: string }) {
     return await this.booksRepo.getBookStageById({ id: params.id });
   }

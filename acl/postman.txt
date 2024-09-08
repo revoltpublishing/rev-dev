@@ -132,3 +132,79 @@ INSERT INTO "RoleMaster" (id, "role") VALUES
       }
     ]
 }
+{
+  "resourceId": 8,
+    "action": 1,
+    "permissions": [
+      {
+        "roleId": 990
+      },{
+        "roleId": 991
+      },{
+        "roleId": 992,
+        "isIncluded": true
+      },
+      {
+        "roleId": 993,
+        "isIncluded": true
+      },
+      {
+        "roleId": 994,
+        "isIncluded": true
+      },
+      {
+        "roleId": 995,
+        "isIncluded": true
+      },
+      {
+        "roleId": 997,
+        "isIncluded": true
+      }
+    ],
+    "depends" : [{
+        "type" : "resc",
+        "value" : "bookUserMap"
+    }]
+}
+{
+  "resourceId": 8,
+    "action": 1,
+    "permissions": [
+      {
+        "roleId": 992,
+        "isIncluded": true
+      },
+      {
+        "roleId": 993,
+        "isIncluded": true
+      },
+      {
+        "roleId": 994,
+        "isIncluded": true
+      },
+      {
+        "roleId": 995,
+        "isIncluded": true
+      },
+      {
+        "roleId": 997,
+        "isIncluded": true
+      }
+    ],
+    "depends" : [{
+        "type" : "resc",
+        "value" : "bookUserMap"
+    }]
+}
+{
+    "resourceId": 8,
+    "action": 2,
+    "permissions" : [],
+    "depends" : [{
+        "type" : "resc",
+        "value" : "bookStage"
+    },{
+        "type" : "resc",
+        "value" : "bookUserMap"
+    }]
+}

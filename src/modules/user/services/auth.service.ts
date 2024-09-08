@@ -3,6 +3,11 @@ import { DbClient } from "src/common/services/dbclient.service";
 import { UserFilterObject } from "../constants/filterObjects";
 import { AccessControlRepository } from "../repositories/acessControl.repository";
 import { CommonExceptions } from "src/common/constants/status";
+import { Prisma } from "@prisma/client";
+import {
+  RESOURCE__DATA_TYPE,
+  RESOURCE_ATTRIB_DATA_TYPE,
+} from "../constants/roles";
 
 @Injectable()
 export class AuthService {
@@ -41,7 +46,7 @@ export class AuthService {
     if (resD.ResourceAction[0].ResourceActionPermission[0].isIncluded) {
       this.req.headers["_dependencyResource_Part"] = "isIncluded";
     }
-    this.logger.log("request context", this.req.headers);
+    // this.logger.log("request context", this.req.headers);
   }
   async checkForDependentResourceAttribute(params: {
     resourceId: number;
@@ -58,12 +63,176 @@ export class AuthService {
       action: params.action,
       roleId: params.roleId,
     });
-    this.logger.log(resAttrib, "dependent resource attribute");
+    // this.logger.log(resAttrib, "dependent resource attribute");
     if (resAttrib.ResourceAttributeAction.length > 0) {
       const attrb = resAttrib.ResourceAttributeAction?.[0];
-      if (attrb.ResourceAttributeActionPermission.length === 0) {
+      if (attrb.ResourceAttributeActionPermission.length === 0)
         throw CommonExceptions.ACCESS_NOT_ALLOWED;
+    }
+    this.req.headers["authorize_success"] = true;
+  }
+  async flagForResources(params: {
+    permission: Prisma.ResourceActionPermissionCreateManyResourceActionInput;
+    resource?: string;
+  }) {
+    this.logger.debug(params, "kdkdkddkk");
+    if (params.resource) {
+      this.req.headers["_dependencyResource"] = params.resource;
+      if (params.permission?.isCreated)
+        this.req.headers["_dependencyResource_Part"] = "isCreated";
+      if (params.permission?.isIncluded)
+        this.req.headers["_dependencyResource_Part"] = "isIncluded";
+    } else {
+      const perms = params.permission;
+      // params.rescInfo.ResourceAttribute?.[0].ResourceAttributeAction?.[0]
+      //   .ResourceAttributeActionPermission[0];
+      if (perms.isCreated) {
+        this.req.headers["_dependencyResource_Part"] = "isCreated";
+      }
+      if (perms.isIncluded) {
+        this.req.headers["_dependencyResource_Part"] = "isIncluded";
       }
     }
   }
+  async resolveOrFlagDependentResources(params: {
+    action: number;
+    depends: Prisma.ResourceActionDependMaxAggregateOutputType[];
+    permissions: Prisma.ResourceActionPermissionCreateManyResourceActionInput;
+  }) {
+    // if (!depends && !params.atb)
+    //   this.flagForResources({
+    //     rescInfo,
+    //     resource: params.atb ? false : true,
+    //   });
+
+    // if (
+    //   params.atb &&
+    //   rescInfo?.["ResourceAttribute"]?.[0].ResourceAttributeAction?.[0]
+    //     .ResourceAttributeActionPermission.length > 0
+    // ) {
+    //   await this.checkForDependentResourceAttribute({
+    //     resourceId: rescInfo.id,
+    //     atb: params.atb,
+    //     action: params.action,
+    //     roleId: userDetails.roleId,
+    //   });
+    // }
+    await this.resolveDependsPermissions({
+      action: params.action,
+      depends: params.depends,
+      permissions: params.permissions,
+    });
+    // for (const dp of depends || []) {
+    //   await this.resolveOrFlagDependentResources({
+    //     resource: dp.value,
+    //     action: params.action,
+    //     ...(dp.type === RESOURCE_ATTRIB_DATA_TYPE && {
+    //       atb: {
+    //         name: dp.value,
+    //         value: accessPayload?.[dp.value],
+    //       },
+    //     }),
+    //   });
+    // }
+  }
+
+  async resolveDependsPermissions(params: {
+    resourceId?: number;
+    resc?: string;
+    atb?: string;
+    action: number;
+    permissions?: Prisma.ResourceActionPermissionCreateManyResourceActionInput;
+    depends: Prisma.ResourceActionDependMaxAggregateOutputType[];
+  }) {
+    const { userDetails } = this.req["context"];
+    const accessPayload =
+      JSON.parse(this.req.headers["accesspayload"]) || undefined;
+    if (params.resc) {
+      console.log("herhehrhe", params.resc, params.permissions);
+      this.flagForResources({
+        permission: params.permissions,
+        resource: params.resc,
+      });
+    }
+    if (params.depends)
+      for (const dp of params.depends) {
+        if (dp.type === RESOURCE__DATA_TYPE) {
+          const resD = await this.accessControlRepo.getResourceDetails({
+            name: dp.value,
+            action: params.action,
+            roleId: userDetails.roleId,
+          });
+          this.logger.debug("herexczxcz", dp.value, params.permissions, resD);
+          this.resolveDependsPermissions({
+            resc: resD.name,
+            action: params.action,
+            depends: resD.ResourceAction?.[0]?.ResourceActionDepend,
+            permissions: params.permissions,
+          });
+        }
+        if (dp.type === RESOURCE_ATTRIB_DATA_TYPE) {
+          await this.checkForDependentResourceAttribute({
+            resourceId: params.resourceId,
+            atb: {
+              name: dp.value,
+              value: accessPayload?.[dp.value],
+            },
+            action: params.action,
+            roleId: userDetails.roleId,
+          });
+        }
+      }
+  }
 }
+
+//   async resolveOrFlagDependentResources(params: {
+//     resource: string;
+//     action: number;
+//     atb?: {
+//       name: string;
+//       value: string;
+//     };
+//   }) {
+//     const { userDetails } = this.req["context"];
+//     const accessPayload =
+//       JSON.parse(this.req.headers["accesspayload"]) || undefined;
+//     this.logger.debug("hehrherhehrhe3334", params);
+//     const rescInfo: any = await this.accessControlRepo.getResourceDetails({
+//       name: params.resource,
+//       action: params.action,
+//       roleId: userDetails.roleId,
+//     });
+//     const depends = rescInfo?.["ResourceAction"]?.[0]?.ResourceActionDepend;
+//     this.logger.debug("hehrherhehrhe3334555", depends, rescInfo);
+//     if (!depends && !params.atb)
+//       this.flagForResources({
+//         rescInfo,
+//         resource: params.atb ? false : true,
+//       });
+
+//     if (
+//       params.atb &&
+//       rescInfo?.["ResourceAttribute"]?.[0].ResourceAttributeAction?.[0]
+//         .ResourceAttributeActionPermission.length > 0
+//     ) {
+//       await this.checkForDependentResourceAttribute({
+//         resourceId: rescInfo.id,
+//         atb: params.atb,
+//         action: params.action,
+//         roleId: userDetails.roleId,
+//       });
+//     }
+//     for (const dp of depends || []) {
+//       await this.resolveOrFlagDependentResources({
+//         resource: dp.value,
+//         action: params.action,
+//         ...(dp.type === RESOURCE_ATTRIB_DATA_TYPE && {
+//           atb: {
+//             name: dp.value,
+//             value: accessPayload?.[dp.value],
+//           },
+//         }),
+//       });
+//     }
+//   }
+// }

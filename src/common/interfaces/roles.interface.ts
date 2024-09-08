@@ -1,3 +1,5 @@
+import { Prisma } from "@prisma/client";
+
 export interface createResourceParamsI {
   name: string;
   action?: resourceActionI;
@@ -51,3 +53,29 @@ export interface resourceAttributePermissionsBodyI {
   action: number;
   atb?: resourceAttributeBodyI;
 }
+
+export type ResourceInfoResponse = Promise<{
+  id: number; // Assuming Resource has an id
+  name: string; // Assuming Resource has a name
+  ResourceAction?: Array<{
+    action: number; // Assuming action is a number
+    ResourceActionPermission?: Prisma.ResourceActionPermissionGetPayload<{}>;
+    ResourceActionDepend?: Array<{
+      // fields for ResourceActionDepend...
+    }>;
+  }>;
+  ResourceAttribute?: Array<{
+    name: string; // Assuming ResourceAttribute has a name
+    value: string; // Assuming ResourceAttribute has a value
+    ResourceAttributeAction?: Array<{
+      action: number; // Assuming action is a number
+      ResourceAttributeActionPermission?: Array<{
+        roleId: number; // Assuming roleId is a number
+        // other permission fields...
+      }>;
+      ResourceAttributeActionDepend?: Array<{
+        // fields for ResourceAttributeActionDepend...
+      }>;
+    }>;
+  }>;
+}>;
