@@ -69,7 +69,6 @@ export class UserController {
     const user = await this.usersRepo.getUserByEmailOrMobile({
       value: body.value,
     });
-    console.log(user);
     if (!user) {
       return CommonExceptions.INVALID_CREDENTIALS("email or mobile");
     }
