@@ -1,19 +1,14 @@
 import { Injectable } from "@nestjs/common";
 import { DbClient } from "src/common/services/dbclient.service";
 import {
-  addBookDraftPageCharacterI,
   addBookDraftPageI,
+  addBookManuscriptBodyI,
 } from "../interfaces/draft.interface";
 
 @Injectable()
 export class DraftRepository {
   constructor(private readonly dbClient: DbClient) {}
-  async addBookManuscript(body: {
-    bkStgId: string;
-    name: string;
-    parentId?: string;
-    isSubmitted?: boolean;
-  }) {
+  async addBookManuscript(body: addBookManuscriptBodyI) {
     return this.dbClient.bookStageManuscript.create({
       data: { ...body },
     });
@@ -68,6 +63,22 @@ export class DraftRepository {
     return this.dbClient.bookStageManuscriptPage.delete({
       where: {
         page_bkStgManuId: { bkStgManuId: params.bkManuId, page: params.page },
+      },
+    });
+  }
+  async getFinalManuscriptForStage(params: {
+    bookId: string;
+    stageId: number;
+  }) {
+    return this.dbClient.bookStage.findFirst({
+      where: params,
+      include: {
+        BookStageManuscript: {
+          where: {
+            isAccepted: true,
+            isSubmitted: true,
+          },
+        },
       },
     });
   }

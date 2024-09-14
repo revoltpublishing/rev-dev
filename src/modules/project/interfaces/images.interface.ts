@@ -11,3 +11,10 @@ export interface uploadImageReqI {
   s3Path: string;
   mimeType: string;
 }
+export interface uploadBookDraftImageI {
+  draftId: string;
+  uploadedBy: string;
+  name: string;
+  s3Path: string;
+  mimeType: string;
+}

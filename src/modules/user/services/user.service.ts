@@ -34,7 +34,7 @@ export class UserService {
     });
     return { ...user, role: role.role };
   }
-  async prepareUserImageRole(params: { user: User }) {
+  async prepareUser(params: { user: User }) {
     const [usImg, usR] = await Promise.all([
       await this.getUserWithImage(params),
       await this.getUserWithRole(params),

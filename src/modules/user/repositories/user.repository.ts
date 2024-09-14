@@ -58,4 +58,18 @@ export class UsersRepository {
       select: this.userFilterObj.userSelectObject,
     });
   }
+  async getUserByEmailOrMobile(params: { value: string }) {
+    return this.dbClient.user.findFirst({
+      where: {
+        OR: [
+          {
+            email: params.value,
+          },
+          {
+            mobile: params.value,
+          },
+        ],
+      },
+    });
+  }
 }

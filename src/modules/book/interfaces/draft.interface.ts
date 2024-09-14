@@ -10,3 +10,18 @@ export interface addBookDraftPageI {
   content: string;
   bkStgManuId: string;
 }
+export interface addPageContentBodyI {
+  page: number;
+  content: string;
+  imageId?: string;
+}
+export interface addPageContentParamsI {
+  mid: string;
+}
+export interface addBookManuscriptBodyI {
+  bkStgId: string;
+  name: string;
+  parentId?: string;
+  isSubmitted?: boolean;
+  imageId?: string;
+}

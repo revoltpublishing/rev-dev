@@ -9,6 +9,7 @@ import { DraftRepository } from "../repositories/draft.repository";
 import { BOOK_STAGE_TREE } from "../constants/stage";
 import { DbExecptions } from "src/common/constants/status";
 import { addBookDraftPageI } from "../interfaces/draft.interface";
+import { ImageFormatInitNames } from "../constants/initNames";
 
 @Injectable()
 export class DraftService {
@@ -53,8 +54,8 @@ export class DraftService {
     const bkStg = await this.draftRepo.getBookDetailsByStage(rest);
     const payload = {
       bkStgId: bkStg.id,
-      name: "Orignal Manuscript",
-      isSubmitted: body.parentBkManuId ? false : true,
+      name: ImageFormatInitNames.OG_MANUSCRIPT_NAME,
+      isSubmitted: true,
       parentId: body.parentBkManuId ? body.parentBkManuId : null,
     };
     if (!body.parentBkManuId) {
@@ -88,7 +89,10 @@ export class DraftService {
       await this.draftRepo.addBookStageManuscriptPages(mpedPgs);
       return bkM;
     }
-    return await this.draftRepo.addBookManuscript(payload);
+    return await this.draftRepo.addBookManuscript({
+      ...payload,
+      name: ImageFormatInitNames.OG_MANUSCRIPT_NAME,
+    });
   }
   splitIntoPages(body: { html: string }): string[] {
     const { html } = body;

@@ -1,12 +1,29 @@
 import { uploadImageI } from "src/modules/book/interfaces/book.interface";
-import { Body, Controller, Get, Param, Post, Put, Req } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Put,
+  Req,
+  UseGuards,
+} from "@nestjs/common";
 import { ProjectPaths } from "src/common/constants/paths";
 import { ImageFormats } from "../constants/formats";
 import { DynamicStatusCodes } from "src/common/constants/status";
 import { DraftService } from "../services/draft.service";
 import { DraftRepository } from "../repositories/draft.repository";
+import { BooksRepository } from "../repositories/book.repository";
+import { BookUserMapIncludeGuard } from "../guards/bookUserMapInc.guard";
+import { ImageFormatInitNames } from "../constants/initNames";
+import {
+  addPageContentBodyI,
+  addPageContentParamsI,
+} from "../interfaces/draft.interface";
 
 @Controller("books/draft")
+@UseGuards(BookUserMapIncludeGuard)
 export class DraftController {
   constructor(
     private readonly draftService: DraftService,
@@ -25,7 +42,7 @@ export class DraftController {
       throw DynamicStatusCodes.INVAID_DOCUMENT_FORMAT(
         ImageFormats.DRAFT_ACCEPTED_FORMATS.join(",")
       );
-    let s3Path: string = `${
+    const s3Path: string = `${
       ProjectPaths.S3_BOOK_DRAFT
     }/${title}${new Date().valueOf()}`;
     if (body.id) {
@@ -48,6 +65,13 @@ export class DraftController {
     }
   ) {
     const stgD = this.draftService.getBookStageId({ stage: body.stage });
+    if (stgD.prevId != null) {
+      const bkD = await this.draftRepo.getFinalManuscriptForStage({
+        bookId: body.bookId,
+        stageId: stgD.id,
+      });
+      body.parentId = bkD.BookStageManuscript[0]?.id;
+    }
     return await this.draftService.prepareDraft({
       bookId: body.bookId,
       stageId: stgD.id,
@@ -57,12 +81,9 @@ export class DraftController {
   @Put("/manuscript/:mid")
   async updateManuscript(
     @Param()
-    params: { mid: string },
+    params: addPageContentParamsI,
     @Body()
-    body: {
-      page: number;
-      content: string;
-    }
+    body: addPageContentBodyI
   ) {
     let ms = await this.draftRepo.getBookStageManucriptById({
       id: params.mid,
@@ -74,9 +95,18 @@ export class DraftController {
       const newMs = await this.draftRepo.addBookManuscript({
         bkStgId: ms.BookStage.id,
         parentId: ms.id,
-        name: `Revised Draft ${(await bkMans).length}`,
+        name: `${ImageFormatInitNames.REVISED_MANUSCRIPT_NAME} ${
+          (
+            await bkMans
+          ).length
+        }`,
+        isSubmitted: body.imageId ? true : false,
+        imageId: body.imageId,
       });
       ms = await this.draftRepo.getBookStageManucriptById({ id: newMs.id });
+    }
+    if (body.imageId) {
+      return { manuscript: ms };
     }
     const pg = await this.draftRepo.getManuscriptPage({
       bkStgManuId: ms.id,
