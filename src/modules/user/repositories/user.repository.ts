@@ -70,6 +70,9 @@ export class UsersRepository {
           },
         ],
       },
+      include: {
+        Role: {},
+      },
     });
   }
 }
