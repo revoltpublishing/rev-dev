@@ -14,7 +14,6 @@ import { ImageFormats } from "../constants/formats";
 import { DynamicStatusCodes } from "src/common/constants/status";
 import { DraftService } from "../services/draft.service";
 import { DraftRepository } from "../repositories/draft.repository";
-import { BooksRepository } from "../repositories/book.repository";
 import { BookUserMapIncludeGuard } from "../guards/bookUserMapInc.guard";
 import { ImageFormatInitNames } from "../constants/initNames";
 import {

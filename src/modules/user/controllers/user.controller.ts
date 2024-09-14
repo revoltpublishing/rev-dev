@@ -36,8 +36,9 @@ export class UserController {
   @Post()
   @UsePipes(new PayloadValidationPipe(createUserReqSchema))
   async add(@Body() body: createUserI, @Req() req: Request) {
+    let userD;
     const { role, ...rest } = body;
-    const { userDetails } = req["context"];
+    if (req["context"]) userD = req["context"].userDetails;
     const roleD = await this.accessControlRepo.getRoleInfoByRole({ role });
     const password = generateRandomPassword();
     if (!roleD) {
@@ -48,7 +49,7 @@ export class UserController {
       ...rest,
       password: hash,
       roleId: roleD.id,
-      createdBy: userDetails.id,
+      createdBy: userD?.id,
     });
     if (body.bookId) {
       this.booksRepo.addUserToBook({
@@ -56,7 +57,7 @@ export class UserController {
         userId: ud.id,
       });
     }
-    ud.password = "";
+    ud.password = password;
     return new DataResponse(HttpStatus.CREATED, "created successfully", ud);
   }
   @Get("/here")

@@ -39,7 +39,11 @@ export class AppModule implements NestModule {
         },
         {
           path: "access-control/resource/permission/list",
-          method: RequestMethod.POST,
+          method: RequestMethod.ALL,
+        },
+        {
+          path: "users/login",
+          method: RequestMethod.ALL,
         }
       )
       .forRoutes({
