@@ -30,6 +30,8 @@ export class CommonExceptions {
       `${args} type of value is missing`,
       HttpStatus.NOT_ACCEPTABLE
     );
+  public static readonly INVALID_CREDENTIALS = (args: string) =>
+    new HttpException(`${args} is invalid`, HttpStatus.NOT_ACCEPTABLE);
 }
 export class DbStatusCodes {
   public static readonly MOBILE_ALREADY_OCCUPIED = {

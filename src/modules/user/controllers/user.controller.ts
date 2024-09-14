@@ -14,12 +14,16 @@ import { PayloadValidationPipe } from "src/common/pipes/payload.pipe";
 import { createUserReqSchema } from "../validationSchema/user";
 import { generateRandomPassword } from "src/common/helpers/generatePassword";
 import { BooksRepository } from "src/modules/book/repositories/book.repository";
-import { DbExecptions, MessageError } from "src/common/constants/status";
+import {
+  CommonExceptions,
+  DbExecptions,
+  MessageError,
+} from "src/common/constants/status";
 import { AccessControlRepository } from "../repositories/acessControl.repository";
 import { UserService } from "../services/user.service";
 import { DataResponse } from "src/common/constants/http/response";
 import { UserResourceIncludeGuard } from "../gaurds/userInc.guard";
-
+import * as bcrypt from "bcrypt";
 @Controller("users")
 export class UserController {
   constructor(
@@ -39,9 +43,10 @@ export class UserController {
     if (!roleD) {
       throw DbExecptions.DOESNOT_EXISTS("role");
     }
+    const hash = await bcrypt.hash(password, 10);
     const ud = await this.usersRepo.createUser({
       ...rest,
-      password,
+      password: hash,
       roleId: roleD.id,
       createdBy: userDetails.id,
     });
@@ -57,6 +62,18 @@ export class UserController {
   @Get("/here")
   async here() {
     return "here";
+  }
+  @Post("/login")
+  async login(@Body() body: { value: string; password: string }) {
+    const user = await this.usersRepo.getUserByEmailOrMobile({
+      value: body.value,
+    });
+    if (!user) {
+      return CommonExceptions.INVALID_CREDENTIALS("email or mobile");
+    }
+    if (!bcrypt.compare(user.password, body.password))
+      CommonExceptions.INVALID_CREDENTIALS("password");
+    return { ...user, password: "" };
   }
   @Post("/list")
   @UseGuards(UserResourceIncludeGuard)
