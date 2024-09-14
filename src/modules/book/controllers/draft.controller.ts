@@ -5,6 +5,7 @@ import { ImageFormats } from "../constants/formats";
 import { DynamicStatusCodes } from "src/common/constants/status";
 import { DraftService } from "../services/draft.service";
 import { DraftRepository } from "../repositories/draft.repository";
+import { BooksRepository } from "../repositories/book.repository";
 
 @Controller("books/draft")
 export class DraftController {
@@ -25,7 +26,7 @@ export class DraftController {
       throw DynamicStatusCodes.INVAID_DOCUMENT_FORMAT(
         ImageFormats.DRAFT_ACCEPTED_FORMATS.join(",")
       );
-    let s3Path: string = `${
+    const s3Path: string = `${
       ProjectPaths.S3_BOOK_DRAFT
     }/${title}${new Date().valueOf()}`;
     if (body.id) {
@@ -48,6 +49,13 @@ export class DraftController {
     }
   ) {
     const stgD = this.draftService.getBookStageId({ stage: body.stage });
+    if (stgD.prevId != null) {
+      const bkD = await this.draftRepo.getSubmittedManuscriptForStage({
+        bookId: body.bookId,
+        stageId: stgD.id,
+      });
+      body.parentId = bkD.BookStageManuscript[0]?.id;
+    }
     return await this.draftService.prepareDraft({
       bookId: body.bookId,
       stageId: stgD.id,

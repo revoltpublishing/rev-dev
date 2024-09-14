@@ -71,4 +71,19 @@ export class DraftRepository {
       },
     });
   }
+  async getSubmittedManuscriptForStage(params: {
+    bookId: string;
+    stageId: number;
+  }) {
+    return this.dbClient.bookStage.findFirst({
+      where: params,
+      include: {
+        BookStageManuscript: {
+          where: {
+            isSubmitted: true,
+          },
+        },
+      },
+    });
+  }
 }

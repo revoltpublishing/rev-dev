@@ -94,7 +94,7 @@ export class BookController {
         );
         const ump = await Promise.all(
           ud.map(async (u) =>
-            this.usersService.prepareUserImageRole({ user: u["User"] })
+            this.usersService.prepareUser({ user: u["User"] })
           )
         );
         obj["BookUserMap"] = ump;
