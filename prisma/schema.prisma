@@ -56,10 +56,11 @@ model Image {
   updatedAt  DateTime @updatedAt
   User       User     @relation(name: "FK_USER_IMAGE_ID", fields: [uploadedBy], references: [id])
 
-  UserImageMap      UserImageMap[]
-  BookStageImageMap BookStageImageMap[]
-  Book              Book?
-  UserImage         User?               @relation(name: "FK_PROFILE_IMAGE_ID")
+  UserImageMap        UserImageMap[]
+  BookStageImageMap   BookStageImageMap[]
+  BookStageManuscript BookStageManuscript[]
+  Book                Book?
+  UserImage           User?                 @relation(name: "FK_PROFILE_IMAGE_ID")
 
   @@index([uploadedBy], name: "FK_IMAGE_UPLOADED_BY_USER_ID_idx")
   @@index([createdAt])
@@ -147,13 +148,15 @@ model BookStageManuscript {
   bkStgId     String
   name        String
   parentId    String?
+  imageId     String?
   isSubmitted Boolean  @default(false)
-  iSAccepted  Boolean  @default(false)
+  isAccepted  Boolean  @default(false)
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   BookStage                   BookStage                     @relation(fields: [bkStgId], references: [id])
+  BookStageImage              Image?                        @relation(fields: [imageId], references: [id])
   parentManuscriptId          BookStageManuscript?          @relation("PREV_MANUSCRPT_BK_ID", fields: [parentId], references: [id])
   otherManuscriptId           BookStageManuscript[]         @relation("PREV_MANUSCRPT_BK_ID")
   BookStageManuscriptPage     BookStageManuscriptPage[]

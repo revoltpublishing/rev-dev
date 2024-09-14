@@ -3,6 +3,7 @@ import { Body, Controller, Get, Param, Post, Req } from "@nestjs/common";
 import { S3Service } from "src/common/services/s3.service";
 import { ProjectPaths } from "src/common/constants/paths";
 import { uploadImageI } from "src/modules/book/interfaces/book.interface";
+import { ImageFormatInitNames } from "src/modules/book/constants/initNames";
 
 @Controller("images")
 export class ImageController {
@@ -10,8 +11,6 @@ export class ImageController {
     private readonly imagesRepo: ImagesRepository,
     private readonly s3Service: S3Service
   ) {}
-
-  async getImageForEntity() {}
 
   @Post("/users/profile/presigned")
   async getPresigned(@Body() body: uploadImageI, @Req() req: Request) {
@@ -76,6 +75,29 @@ export class ImageController {
     });
     return { signedURL, id: img.id };
   }
+  @Post("/books/draft")
+  async addBookDraftManuscriptImage(
+    @Req() req: Request,
+    @Body() body: uploadImageI
+  ) {
+    const { userDetails } = req["context"];
+    let { mimeType } = body;
+    let s3Path: string = `${ProjectPaths.S3_BOOK_DRAFT_MANUSCRIPT_IMG}/${
+      ImageFormatInitNames.REVISED_MANUSCRIPT_NAME
+    }${new Date().valueOf()}`;
+    const signedURL = await this.s3Service.getPresignedURLForUpload({
+      path: s3Path,
+      mimeType,
+    });
+    const img = await this.imagesRepo.addImage({
+      uploadedBy: userDetails.id,
+      s3Path,
+      title: body.title,
+      mimeType,
+    });
+    return { signedURL, id: img.id };
+  }
+
   @Get("/books/stage/:bkStgId")
   async getBookStageImages(@Param() params: { bkStgId: string }) {
     const img = await this.imagesRepo.getBookStageImages(params);
