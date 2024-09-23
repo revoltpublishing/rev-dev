@@ -1,9 +1,5 @@
 import { Injectable, Logger } from "@nestjs/common";
-import {
-  filterUserI,
-  filterUserRepoI,
-  UserI,
-} from "../interfaces/user.interface";
+import { filterUserRepoI, UserI } from "../interfaces/user.interface";
 import { DbClient } from "src/common/services/dbclient.service";
 import { prismaErrorMapper } from "src/common/mappers/prisma";
 import { Prisma } from "@prisma/client";

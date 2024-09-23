@@ -36,7 +36,7 @@ export class AccessMiddleware implements NestMiddleware {
       if (!userDetails) {
         throw CommonExceptions.INVALID_ACCESS_TOKEN;
       }
-      if (!act || !resc) {
+      if (act == undefined || !resc) {
         throw CommonExceptions.INVAID_GENERAL;
       }
       req["context"] = { userDetails };
