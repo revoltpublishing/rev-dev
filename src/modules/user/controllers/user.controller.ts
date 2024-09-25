@@ -62,7 +62,7 @@ export class UserController {
       });
     }
     ud.password = password;
-    return new DataResponse(HttpStatus.CREATED, "created successfully", ud);
+    return ud;
   }
   @Get("/here")
   async here() {
@@ -130,10 +130,10 @@ export class UserController {
           };
         })
       );
-      return new DataResponse(HttpStatus.FOUND, "list", {
+      return {
         count,
         list: res,
-      });
+      };
     } catch (e) {
       throw new MessageError(e);
     }
