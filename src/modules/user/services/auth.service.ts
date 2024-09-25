@@ -24,14 +24,6 @@ export class AuthService {
     private readonly req: Request
   ) {}
 
-  async getUserInfoByAccessToken(params: { token: string }) {
-    return this.dbClient.user.findUnique({
-      where: {
-        accessToken: params.token,
-      },
-      include: this.userFilterObj.userIncludeObject,
-    });
-  }
   async checkForDependentResource(params: {
     name: string;
     action: number;
