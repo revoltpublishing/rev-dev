@@ -6,7 +6,6 @@ import {
 } from "../interfaces/user.interface";
 import { DbClient } from "src/common/services/dbclient.service";
 import { prismaErrorMapper } from "src/common/mappers/prisma";
-import { Prisma } from "@prisma/client";
 import { UserFilterObject } from "../constants/filterObjects";
 
 @Injectable()

@@ -54,7 +54,7 @@ export class DraftRepository {
       include: { BookStage: {} },
     });
   }
-  async getBookManuscriptsyBkStgId(params: { bkStgId: string }) {
+  async getBookManuscriptsBkStgId(params: { bkStgId: string }) {
     return this.dbClient.bookStageManuscript.findMany({
       where: params,
     });

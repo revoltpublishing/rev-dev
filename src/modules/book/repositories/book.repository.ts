@@ -137,4 +137,18 @@ export class BooksRepository {
       data: { ...rest },
     });
   }
+  async getBookByManuscriptId(params: { mid: string }) {
+    return this.dbClient.bookStageManuscript.findFirst({
+      where: {
+        id: params.mid,
+      },
+      include: {
+        BookStage: {
+          include: {
+            Book: {},
+          },
+        },
+      },
+    });
+  }
 }

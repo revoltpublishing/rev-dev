@@ -89,6 +89,16 @@ export interface updateBookStageI {
   isCompleted?: boolean;
   isSubmitted?: boolean;
 }
+
+export interface bookStageFlagsI {
+  stageId: number;
+  isActive?: boolean;
+  isAccepted?: boolean;
+  isWorking?: boolean;
+  isCompleted?: boolean;
+  isSubmitted?: boolean;
+}
+
 export interface bookUserI {
   bookId: string;
   userId: string;

@@ -88,7 +88,7 @@ export class DraftController {
       id: params.mid,
     });
     if (ms.isSubmitted) {
-      const bkMans = this.draftRepo.getBookManuscriptsyBkStgId({
+      const bkMans = this.draftRepo.getBookManuscriptsBkStgId({
         bkStgId: ms.BookStage.id,
       });
       const newMs = await this.draftRepo.addBookManuscript({

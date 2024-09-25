@@ -2,7 +2,6 @@ import {
   Body,
   Controller,
   Get,
-  HttpStatus,
   Param,
   Post,
   Put,
@@ -29,8 +28,6 @@ import { userRoleInitCount } from "src/modules/user/constants/roles";
 import { UsersRepository } from "src/modules/user/repositories/user.repository";
 import { BookUserMapIncludeGuard } from "../guards/bookUserMapInc.guard";
 import { UserResourceIncludeGuard } from "src/modules/user/gaurds/userInc.guard";
-import { DataResponse } from "src/common/constants/http/response";
-import { DataResponseMessages } from "src/common/constants/messages";
 
 @Controller("books")
 export class BookController {
@@ -55,11 +52,7 @@ export class BookController {
       ...body,
       createdBy: userDetails.id,
     });
-    return new DataResponse(
-      HttpStatus.CREATED,
-      DataResponseMessages.CREATED_SUCCESSFULLY,
-      bk
-    );
+    return bk;
   }
 
   // filtering based on role required
@@ -102,10 +95,10 @@ export class BookController {
         return obj;
       })
     );
-    return new DataResponse(HttpStatus.ACCEPTED, "list", {
+    return {
       count,
       list: listRes,
-    });
+    };
   }
 
   @Get("/:id")
@@ -138,7 +131,7 @@ export class BookController {
   }
   @Put("/:id/stage/:stage")
   @UseGuards(BookUserMapIncludeGuard)
-  updateBookStage(
+  async updateBookStage(
     @Param()
     params: bookIdStageParamsI,
     @Body() body: updateBookStageI
@@ -147,7 +140,7 @@ export class BookController {
     if (!stg) {
       throw DbExecptions.DOESNOT_EXISTS("Stage");
     }
-    return this.booksRepo.updateBookStage({
+    await this.booksRepo.updateBookStage({
       ...body,
       stageId: stg.id,
       bookId: params.id,
@@ -171,13 +164,32 @@ export class BookController {
     return this.booksRepo.addManuscriptActivity(body);
   }
   @Put("/manuscript/:mid")
-  updateBookStageManuscriptStatus(
+  async updateBookStageManuscriptStatus(
     @Param("mid") mid: string,
-    @Body() body: updateManuscriptStatusI
+    @Body() body: updateManuscriptStatusI,
+    @Req() req: Request
   ) {
-    return this.booksRepo.updateManuscriptStatus({
-      id: mid,
+    const { userDetails } = req["context"];
+    const [res, manu] = await Promise.all([
+      await this.booksRepo.updateManuscriptStatus({
+        id: mid,
+        ...body,
+      }),
+      ,
+      await this.booksRepo.getBookByManuscriptId({
+        mid,
+      }),
+    ]);
+    const content = this.booksService.getActivityContent({
       ...body,
+      stageId: manu.BookStage.id,
     });
+    await this.booksRepo.addManuscriptActivity({
+      bkStgManuId: mid,
+      content,
+      type: 0,
+      createdBy: userDetails.id,
+    });
+    return res;
   }
 }
