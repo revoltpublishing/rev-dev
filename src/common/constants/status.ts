@@ -16,10 +16,14 @@ export class CommonExceptions {
   );
   public static readonly INVAID_GENERAL = new HttpException(
     "Action is invalid",
-    HttpStatus.UNAUTHORIZED
+    HttpStatus.NOT_ACCEPTABLE
   );
   public static readonly ACCESS_NOT_ALLOWED = new ForbiddenException(
     "You are not allowed to perform this action"
+  );
+  public static readonly TOKEN_EXPIRED = new HttpException(
+    "Token has expired",
+    HttpStatus.SEE_OTHER
   );
   public static readonly INVALID_BOOK_STAGE_REDIRECTION = new HttpException(
     "Book can't move to the provided state, as it has dependency on some other stages",

@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   HttpStatus,
+  Param,
   Post,
   Req,
   UseGuards,
@@ -24,13 +25,15 @@ import { UserService } from "../services/user.service";
 import { DataResponse } from "src/common/constants/http/response";
 import { UserResourceIncludeGuard } from "../gaurds/userInc.guard";
 import * as bcrypt from "bcrypt";
+import { AuthService } from "../services/auth.service";
 @Controller("users")
 export class UserController {
   constructor(
     private readonly usersRepo: UsersRepository,
     private readonly booksRepo: BooksRepository,
     private readonly accessControlRepo: AccessControlRepository,
-    private readonly usersService: UserService
+    private readonly usersService: UserService,
+    private readonly authService: AuthService
   ) {}
 
   @Post()
@@ -50,6 +53,7 @@ export class UserController {
       password: hash,
       roleId: roleD.id,
       createdBy: userD?.id,
+      accessToken: "",
     });
     if (body.bookId) {
       this.booksRepo.addUserToBook({
@@ -74,8 +78,18 @@ export class UserController {
     }
     if (!bcrypt.compare(user.password, body.password))
       CommonExceptions.INVALID_CREDENTIALS("password");
-    return { ...user, password: "" };
+    const accessToken = await this.authService.generateToken({
+      userId: user.id,
+    });
+    this.usersRepo.updateUser({ accessToken, email: user.email });
+    return { ...user, password: "", accessToken };
   }
+  @Get("/login/:token")
+  async getNewToken(@Param() params: { token: string }) {
+    const decoded = this.authService.verifyToken(params);
+    return this.authService.createTokenForUser({ userId: decoded["userId"] });
+  }
+
   @Post("/list")
   @UseGuards(UserResourceIncludeGuard)
   async list(@Body() body: filterUserI) {

@@ -8,7 +8,9 @@ import {
   RESOURCE__DATA_TYPE,
   RESOURCE_ATTRIB_DATA_TYPE,
 } from "../constants/roles";
-
+import * as jwt from "jsonwebtoken";
+import { ConfigService } from "@nestjs/config";
+import { UsersRepository } from "../repositories/user.repository";
 @Injectable()
 export class AuthService {
   constructor(
@@ -16,6 +18,8 @@ export class AuthService {
     private readonly accessControlRepo: AccessControlRepository,
     private readonly userFilterObj: UserFilterObject,
     private readonly logger: Logger,
+    private readonly configService: ConfigService,
+    private readonly usersRepo: UsersRepository,
     @Inject("REQUEST")
     private readonly req: Request
   ) {}
@@ -182,6 +186,34 @@ export class AuthService {
           });
         }
       }
+  }
+
+  async generateToken(params: any) {
+    return jwt.sign(params, this.configService.get("JWT_SECRET"), {
+      expiresIn: this.configService.get("JWT_TTL"),
+    });
+  }
+  verifyToken(params: { token: string }) {
+    const now = Math.floor(Date.now() / 1000);
+    const decoded = jwt.verify(
+      params.token,
+      this.configService.get("JWT_SECRET")
+    ) as jwt.JwtPayload;
+    if (!decoded) {
+      return { ...decoded, valid: false };
+    }
+    console.log(decoded, "cmcmcmmc");
+    if (decoded.exp <= now) {
+      return { ...decoded, valid: false };
+    }
+    return { ...decoded, valid: true };
+  }
+
+  async createTokenForUser(params: { userId: string }) {
+    const tkn = await this.generateToken({ userId: params.userId });
+    const ud = await this.usersRepo.getUserById({ id: params.userId });
+    this.usersRepo.updateUser({ accessToken: tkn, email: ud.email });
+    return tkn;
   }
 }
 

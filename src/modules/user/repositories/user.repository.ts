@@ -1,5 +1,9 @@
 import { Injectable, Logger } from "@nestjs/common";
-import { filterUserRepoI, UserI } from "../interfaces/user.interface";
+import {
+  filterUserRepoI,
+  updateUserI,
+  UserI,
+} from "../interfaces/user.interface";
 import { DbClient } from "src/common/services/dbclient.service";
 import { prismaErrorMapper } from "src/common/mappers/prisma";
 import { Prisma } from "@prisma/client";
@@ -24,10 +28,15 @@ export class UsersRepository {
       return prismaErrorMapper(e);
     }
   }
-  async updateUser(params: UserI) {
+  async updateUser(params: updateUserI) {
     return await this.dbClient.user.update({
       data: {
-        ...params,
+        firstName: params.firstName,
+        lastName: params.lastName,
+        accessToken: params.accessToken,
+        password: params.password,
+        mobile: params.mobile,
+        mobileRegion: params.mobileRegion,
       },
       where: {
         email: params.email,

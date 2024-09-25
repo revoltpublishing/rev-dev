@@ -35,6 +35,6 @@ import {
     ResourceAttributeGuard,
   ],
   imports: [ProjectModule, BookModule],
-  exports: [AuthService, AccessControlRepository],
+  exports: [AuthService, AccessControlRepository, UsersRepository],
 })
 export class UsersModule {}

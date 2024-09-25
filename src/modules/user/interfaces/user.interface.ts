@@ -8,9 +8,22 @@ export interface UserI {
   password: string;
   mobileRegion: string;
   roleId: number;
+  accessToken: string;
   bookId?: string;
   s3Url?: string;
   createdBy?: string;
+}
+
+export interface updateUserI {
+  id?: string;
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  mobile?: string;
+  password?: string;
+  mobileRegion?: string;
+  accessToken?: string;
+  profileImageId?: string;
 }
 
 export interface createUserI {

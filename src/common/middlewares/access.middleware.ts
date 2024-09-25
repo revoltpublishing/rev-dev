@@ -7,13 +7,15 @@ import {
 import { AuthService } from "src/modules/user/services/auth.service";
 import { CommonExceptions } from "../constants/status";
 import { AccessControlRepository } from "src/modules/user/repositories/acessControl.repository";
+import { UsersRepository } from "src/modules/user/repositories/user.repository";
 
 @Injectable()
 export class AccessMiddleware implements NestMiddleware {
   constructor(
     private readonly logger: Logger,
     private readonly authService: AuthService,
-    private readonly accessControlRepo: AccessControlRepository
+    private readonly accessControlRepo: AccessControlRepository,
+    private readonly usersRepo: UsersRepository
   ) {}
   async use(req: Request, res: Response, next: () => void) {
     this.logger.log("in mid!");
@@ -24,8 +26,12 @@ export class AccessMiddleware implements NestMiddleware {
       if (!accessToken) {
         throw CommonExceptions.INVALID_ACCESS_TOKEN;
       }
-      const userDetails = await this.authService.getUserInfoByAccessToken({
-        token: accessToken,
+      const decodedTkn = this.authService.verifyToken({ token: accessToken });
+      if (!decodedTkn.valid) {
+        throw CommonExceptions.TOKEN_EXPIRED;
+      } // FE WILL GET 303 ERROR IF TOKEN IS NOT VALID AND LATER HAS TO REQUEST WITH THIS EXPIRED TOKEN TO GET NEW ONE
+      const userDetails = await this.usersRepo.getUserById({
+        id: decodedTkn["userId"],
       });
       const resc: string = req.headers["resource"];
       const act = parseInt(req.headers["action"]);
@@ -40,7 +46,7 @@ export class AccessMiddleware implements NestMiddleware {
         throw CommonExceptions.INVAID_GENERAL;
       }
       req["context"] = { userDetails };
-      console.log(userDetails, "dmddmdmdmd");
+      console.log(userDetails, "User Details");
       const rescInfo = await this.accessControlRepo.getResourceInfo({
         resc,
         roleId: userDetails.roleId,
@@ -68,27 +74,22 @@ export class AccessMiddleware implements NestMiddleware {
       }
       if (rescInfo.ResourceAction.length > 0) {
         if (rescInfo.ResourceAction[0]?.ResourceActionDepend.length > 0) {
-          // this.logger.debug("hehrherhehrhe1");
           await this.authService.resolveDependsPermissions({
             action: act,
             depends: rescInfo.ResourceAction?.[0].ResourceActionDepend,
             permissions:
               rescInfo.ResourceAction?.[0].ResourceActionPermission[0],
           });
-          // this.logger.debug("hehrherhehrhe2");
         }
         if (
           rescInfo.ResourceAction?.[0]?.ResourceActionPermission.length > 0 &&
           rescInfo.ResourceAction[0]?.ResourceActionDepend.length === 0
         ) {
-          // this.logger.debug("hehrherhehrhe3");
           await this.authService.flagForResources({
             permission: rescInfo.ResourceAction[0].ResourceActionPermission[0],
             resource: rescInfo.name,
           });
-          // this.logger.debug("hehrherhehrhe4");
         }
-        // this.logger.debug("hehrherhehrhe5");
         if (
           atb &&
           rescInfo.ResourceAttribute?.[0].ResourceAttributeAction?.[0]
@@ -113,11 +114,8 @@ export class AccessMiddleware implements NestMiddleware {
         act,
       };
     } catch (e) {
-      if (e instanceof ForbiddenException) {
-        throw e; // Re-throw ForbiddenException
-      }
       this.logger.error("Middleware ERROR:", e);
-      throw CommonExceptions.ACCESS_NOT_ALLOWED;
+      throw e;
     }
     next();
   }
