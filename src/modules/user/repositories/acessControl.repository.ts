@@ -43,8 +43,11 @@ export class AccessControlRepository {
         }),
       },
       include: {
-        ResourceAction: {},
-        ResourceActionDepend: {},
+        ResourceAction: {
+          include: {
+            ResourceActionDepend: {},
+          },
+        },
         ResourceAttribute: {},
       },
     });
@@ -106,9 +109,12 @@ export class AccessControlRepository {
         },
       },
       include: {
-        ResourceAttributeAction: {},
-        ResourceActionDepend: {},
-        ResourceAttributeActionDepend: {},
+        ResourceAttributeAction: {
+          include: {
+            ResourceAttributeActionDepend: {},
+          },
+        },
+        // ResourceActionDepend: {},
         Resource: {},
       },
     });
@@ -145,8 +151,11 @@ export class AccessControlRepository {
             include: {
               ResourceAttributeActionDepend: {
                 include: {
-                  Resource: {},
-                  ResourceAttribute: {},
+                  ResourceAttributeAction: {
+                    include: {
+                      ResourceAttribute: {},
+                    },
+                  },
                 },
               },
               ResourceAttributeActionPermission: {

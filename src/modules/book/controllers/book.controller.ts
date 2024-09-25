@@ -65,31 +65,35 @@ export class BookController {
       const stgd = BOOK_STAGE_TREE.find((bk) => bk.stage === body.stage);
       body.stageId = stgd.id;
     }
-    const list = await this.booksService.getFilteredBooks({
-      ...body,
-      ...internalAccessPayload,
-    });
-    const count = await this.booksService.getFilteredBooksCount({
-      ...body,
-      ...internalAccessPayload,
-    });
+    const [list, count] = await Promise.all([
+      this.booksService.getFilteredBooks({
+        ...body,
+        ...internalAccessPayload,
+      }),
+      this.booksService.getFilteredBooksCount({
+        ...body,
+        ...internalAccessPayload,
+      }),
+    ]);
     const listRes = await Promise.all(
       list.map(async (ls) => {
         const obj = { ...ls };
         const ud = obj["BookUserMap"];
-        const stgs = await Promise.all(
-          obj["BookStage"].map(async (bkstg) => {
-            bkstg.stage = BOOK_STAGE_TREE.find(
-              (v) => v.id === bkstg.stageId
-            ).stage;
-            return bkstg;
-          })
-        );
-        const ump = await Promise.all(
-          ud.map(async (u) =>
-            this.usersService.prepareUser({ user: u["User"] })
-          )
-        );
+        const [stgs, ump] = await Promise.all([
+          await Promise.all(
+            obj["BookStage"].map(async (bkstg) => {
+              bkstg.stage = BOOK_STAGE_TREE.find(
+                (v) => v.id === bkstg.stageId
+              ).stage;
+              return bkstg;
+            })
+          ),
+          Promise.all(
+            ud.map(async (u) =>
+              this.usersService.prepareUser({ user: u["User"] })
+            )
+          ),
+        ]);
         obj["BookUserMap"] = ump;
         obj["BookStage"] = stgs;
         return obj;

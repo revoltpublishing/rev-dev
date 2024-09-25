@@ -141,8 +141,9 @@ export class AuthService {
     depends: Prisma.ResourceActionDependMaxAggregateOutputType[];
   }) {
     const { userDetails } = this.req["context"];
-    const accessPayload =
-      JSON.parse(this.req.headers["accesspayload"]) || undefined;
+    const accessPayload = this.req.headers["accesspayload"]
+      ? JSON.parse(this.req.headers["accesspayload"])
+      : undefined;
     if (params.resc) {
       console.log("herhehrhe", params.resc, params.permissions);
       this.flagForResources({

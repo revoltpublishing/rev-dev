@@ -215,10 +215,12 @@ model Resource {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  ResourceAttribute             ResourceAttribute[]
-  ResourceAction                ResourceAction[]
-  ResourceActionDepend          ResourceActionDepend[]
-  ResourceAttributeActionDepend ResourceAttributeActionDepend[]
+  ResourceAttribute ResourceAttribute[]
+  ResourceAction    ResourceAction[]
+  //   ResourceAttribute             ResourceAttribute[]
+  // ResourceAction                ResourceAction[]
+  // ResourceActionDepend          ResourceActionDepend[]
+  // ResourceAttributeActionDepend ResourceAttributeActionDepend[]
 }
 
 model ResourceAttribute {
@@ -229,10 +231,13 @@ model ResourceAttribute {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
-  ResourceAttributeAction       ResourceAttributeAction[]
-  Resource                      Resource                        @relation(fields: [resourceId], references: [id])
-  ResourceActionDepend          ResourceActionDepend[]
-  ResourceAttributeActionDepend ResourceAttributeActionDepend[]
+  ResourceAttributeAction ResourceAttributeAction[]
+  Resource                Resource                  @relation(fields: [resourceId], references: [id])
+
+  //   ResourceAttributeAction       ResourceAttributeAction[]
+  // Resource                      Resource                        @relation(fields: [resourceId], references: [id])
+  // ResourceActionDepend          ResourceActionDepend[]
+  // ResourceAttributeActionDepend ResourceAttributeActionDepend[]
 
   @@unique([resourceId, name, value])
   @@index([resourceId], name: "FK_RA_RESOURCE_ID_idx")
@@ -302,14 +307,17 @@ model ResourceActionDepend {
   type             String
   value            String
   resourceActionId Int
+  isInternal       Boolean  @default(false)
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
-  ResourceAction      ResourceAction     @relation(fields: [resourceActionId], references: [id])
-  Resource            Resource?          @relation(fields: [resourceId], references: [id])
-  resourceId          Int?
-  ResourceAttribute   ResourceAttribute? @relation(fields: [resourceAttributeId], references: [id])
-  resourceAttributeId Int?
+  ResourceAction ResourceAction @relation(fields: [resourceActionId], references: [id])
+
+  // ResourceAction      ResourceAction     @relation(fields: [resourceActionId], references: [id])
+  // Resource            Resource?          @relation(fields: [resourceId], references: [id])
+  // resourceId          Int?
+  // ResourceAttribute   ResourceAttribute? @relation(fields: [resourceAttributeId], references: [id])
+  // resourceAttributeId Int?
 
   @@unique([type, value, resourceActionId])
 }
@@ -319,14 +327,15 @@ model ResourceAttributeActionDepend {
   type                     String
   value                    String
   resourceAttibuteActionId Int
+  isInternal               Boolean  @default(false)
   createdAt                DateTime @default(now())
   updatedAt                DateTime @updatedAt
 
   ResourceAttributeAction ResourceAttributeAction @relation(fields: [resourceAttibuteActionId], references: [id])
-  Resource                Resource?               @relation(fields: [resourceId], references: [id])
-  resourceId              Int?
-  ResourceAttribute       ResourceAttribute?      @relation(fields: [resourceAttributeId], references: [id])
-  resourceAttributeId     Int?
+  // Resource                Resource?               @relation(fields: [resourceId], references: [id])
+  // resourceId              Int?
+  // ResourceAttribute       ResourceAttribute?      @relation(fields: [resourceAttributeId], references: [id])
+  // resourceAttributeId     Int?
 
   @@unique([type, value, resourceAttibuteActionId])
 }
