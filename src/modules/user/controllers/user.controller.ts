@@ -23,8 +23,8 @@ import { AccessControlRepository } from "../repositories/acessControl.repository
 import { UserService } from "../services/user.service";
 import { DataResponse } from "src/common/constants/http/response";
 import { UserResourceIncludeGuard } from "../gaurds/userInc.guard";
-import * as bcrypt from "bcrypt";
 import { AuthService } from "../services/auth.service";
+const bcrypt = require("bcryptjs");
 @Controller("users")
 export class UserController {
   constructor(
