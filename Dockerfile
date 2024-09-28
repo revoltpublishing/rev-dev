@@ -5,7 +5,7 @@ WORKDIR /backend/app
 COPY package*.json ./
 RUN npm install
 RUN npx prisma generate 
-RUN npx prisma db migrate
+RUN npx prisma migrate resolve --applied 0_init
 COPY . .
 
 RUN npm run build
