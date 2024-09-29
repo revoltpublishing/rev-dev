@@ -15,6 +15,9 @@ RUN npm install --verbose --no-interaction
 # Ensure the Prisma schema is available
 COPY . .
 RUN ls -la prisma/ && cat prisma/schema.prisma
+RUN npx tsc --noEmit --diagnostics
+RUN npm run build:tsc --verbose --no-interaction || { cat /root/.npm/_logs/*.log; exit 1; }
+
 RUN npx prisma generate --schema=prisma/schema.prisma
 
 # Run build with fallback to output logs in case of error
