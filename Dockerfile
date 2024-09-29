@@ -3,12 +3,12 @@ FROM node:22.9.0
 WORKDIR /backend/app
 
 COPY package*.json ./
-RUN npm install
+RUN npm install --verbose
 # RUN npx prisma generate 
 COPY . .
-RUN ls
+RUN ls -la
 RUN npx prisma generate --schema=prisma/schema.prisma
 
-RUN npm run build --no-interaction
+RUN npm run build --verbose
 
 CMD [ "node", "dist/main.js" ]
