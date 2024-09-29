@@ -1,6 +1,7 @@
 FROM node:20-alpine AS builder
 WORKDIR /app
 COPY package*.json ./
+RUN npm cache clean --force
 RUN npm install --verbose --no-interaction
 COPY . .
 RUN npx prisma generate --schema=prisma/schema.prisma
