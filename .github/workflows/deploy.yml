@@ -35,6 +35,7 @@ jobs:
       # Step 4: Deploy to Kubernetes
       - name: Deploy to EKS
         run: |
+          aws eks update-kubeconfig --name {{secrets.REV_CLUSTER}} --region {{secrets.REV_CLUSTER_REGION}}
           kubectl apply -f rev-infra/backend/revolt/k8/deployment.yml
           kubectl apply -f rev-infra/backend/revolt/k8/service.yml
 
