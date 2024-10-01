@@ -1,0 +1,341 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id             String   @id @default(uuid())
+  firstName      String
+  lastName       String
+  email          String   @unique()
+  mobile         String   @unique()
+  password       String
+  mobileRegion   String
+  accessToken    String?
+  profileImageId String?  @unique()
+  isActive       Boolean  @default(true)
+  roleId         Int
+  createdBy      String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  Image                       Image[]                       @relation(name: "FK_USER_IMAGE_ID")
+  UserImageMap                UserImageMap[]
+  Book                        Book[]
+  BookUserMap                 BookUserMap[]
+  ProfileImage                Image?                        @relation(name: "FK_PROFILE_IMAGE_ID", fields: [profileImageId], references: [id])
+  BookStageManuscriptPage     BookStageManuscriptPage[]
+  Role                        RoleMaster                    @relation(fields: [roleId], references: [id])
+  CreatedByUser               User?                         @relation(fields: [createdBy], references: [id], name: "FK_CREATED_BY_USER_SELF")
+  OtherCreatedByUser          User[]                        @relation(name: "FK_CREATED_BY_USER_SELF")
+  BookStageManuscriptActivity BookStageManuscriptActivity[]
+
+  @@index([createdAt])
+  @@index([accessToken])
+}
+
+model Image {
+  id         String   @id @default(uuid())
+  name       String
+  s3Path     String
+  mimeType   String
+  uploadedBy String
+  isActive   Int      @default(1)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  User       User     @relation(name: "FK_USER_IMAGE_ID", fields: [uploadedBy], references: [id])
+
+  UserImageMap        UserImageMap[]
+  BookStageImageMap   BookStageImageMap[]
+  BookStageManuscript BookStageManuscript[]
+  Book                Book?
+  UserImage           User?                 @relation(name: "FK_PROFILE_IMAGE_ID")
+
+  @@index([uploadedBy], name: "FK_IMAGE_UPLOADED_BY_USER_ID_idx")
+  @@index([createdAt])
+}
+
+model UserImageMap {
+  id        Int      @id @default(autoincrement())
+  userId    String
+  imageId   String
+  isActive  Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  User  User  @relation(fields: [userId], references: [id])
+  Image Image @relation(fields: [imageId], references: [id])
+}
+
+model Book {
+  id           String   @id @default(uuid())
+  title        String
+  description  String
+  draftImageId String?  @unique()
+  createdBy    String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  BookStage         BookStage[]
+  BookUserMap       BookUserMap[]
+  BookDraft         Image?        @relation(fields: [draftImageId], references: [id])
+  BookCreatedByUser User          @relation(fields: [createdBy], references: [id])
+
+  @@index([id])
+}
+
+model BookUserMap {
+  id        Int      @id @default(autoincrement())
+  bookId    String
+  userId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  User User @relation(fields: [userId], references: [id])
+  Book Book @relation(fields: [bookId], references: [id])
+
+  @@unique([bookId, userId])
+  @@index([userId], name: "FK_BOOK_USER_ID_idx")
+}
+
+model BookStage {
+  id           String   @id @default(uuid())
+  bookId       String
+  stageId      Int
+  isAccepted   Boolean  @default(false) // when stage has been submitted and reviewed by author
+  isActive     Boolean  @default(false) // when stage is applied 
+  isEditing    Boolean  @default(false) // work on stage is in progress
+  isCompleted  Boolean  @default(false) // is stage completed by concerned party
+  requirements String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  BookStageImageMap BookStageImageMap[]
+
+  Book                Book                  @relation(fields: [bookId], references: [id])
+  BookStageManuscript BookStageManuscript[]
+
+  @@unique([bookId, stageId])
+  @@index([bookId, stageId], name: "FK_BOOK_ID_STAGE_idx")
+}
+
+model BookStageImageMap {
+  id        Int      @id @default(autoincrement())
+  bkStgId   String
+  imageId   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  Image     Image     @relation(fields: [imageId], references: [id])
+  BookStage BookStage @relation(fields: [bkStgId], references: [id])
+
+  @@index([bkStgId])
+}
+
+model BookStageManuscript {
+  id          String   @id @default(uuid())
+  bkStgId     String
+  name        String
+  parentId    String?
+  imageId     String?
+  isSubmitted Boolean  @default(false)
+  isAccepted  Boolean  @default(false)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  BookStage                   BookStage                     @relation(fields: [bkStgId], references: [id])
+  BookStageImage              Image?                        @relation(fields: [imageId], references: [id])
+  parentManuscriptId          BookStageManuscript?          @relation("PREV_MANUSCRPT_BK_ID", fields: [parentId], references: [id])
+  otherManuscriptId           BookStageManuscript[]         @relation("PREV_MANUSCRPT_BK_ID")
+  BookStageManuscriptPage     BookStageManuscriptPage[]
+  BookStageManuscriptActivity BookStageManuscriptActivity[]
+
+  @@index([bkStgId, parentId], name: "MANUSCRIPT_BKSTG_PRNT_idx")
+}
+
+model BookStageManuscriptPage {
+  id          String @id @default(uuid())
+  page        Int
+  content     String
+  bkStgManuId String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  updatedBy String?
+
+  BookStageManuscript         BookStageManuscript @relation(references: [id], fields: [bkStgManuId])
+  BookStageManucriptUpdatedBy User?               @relation(fields: [updatedBy], references: [id])
+
+  @@unique([page, bkStgManuId])
+  @@index([bkStgManuId, page])
+}
+
+model BookStageManuscriptActivity {
+  id          String   @id @default(uuid())
+  bkStgManuId String
+  content     String
+  type        Int
+  createdBy   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  BookStageManuscript         BookStageManuscript @relation(references: [id], fields: [bkStgManuId])
+  BookStageManucriptUpdatedBy User?               @relation(fields: [createdBy], references: [id])
+
+  @@index([bkStgManuId])
+}
+
+// *****************************  ACL TABLES STARTED ****************************************
+
+model RoleMaster {
+  id        Int      @id
+  role      String   @unique
+  createdAt DateTime @default(now())
+
+  User                              User[]
+  ResourceActionPermission          ResourceActionPermission[]
+  ResourceAttributeActionPermission ResourceAttributeActionPermission[]
+}
+
+model Resource {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique()
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  ResourceAttribute ResourceAttribute[]
+  ResourceAction    ResourceAction[]
+  //   ResourceAttribute             ResourceAttribute[]
+  // ResourceAction                ResourceAction[]
+  // ResourceActionDepend          ResourceActionDepend[]
+  // ResourceAttributeActionDepend ResourceAttributeActionDepend[]
+}
+
+model ResourceAttribute {
+  id         Int      @id @default(autoincrement())
+  name       String
+  value      String
+  resourceId Int
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  ResourceAttributeAction ResourceAttributeAction[]
+  Resource                Resource                  @relation(fields: [resourceId], references: [id])
+
+  //   ResourceAttributeAction       ResourceAttributeAction[]
+  // Resource                      Resource                        @relation(fields: [resourceId], references: [id])
+  // ResourceActionDepend          ResourceActionDepend[]
+  // ResourceAttributeActionDepend ResourceAttributeActionDepend[]
+
+  @@unique([resourceId, name, value])
+  @@index([resourceId], name: "FK_RA_RESOURCE_ID_idx")
+}
+
+model ResourceAction {
+  id         Int      @id @default(autoincrement())
+  resourceId Int
+  action     Int
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  Resource                 Resource                   @relation(fields: [resourceId], references: [id])
+  ResourceActionDepend     ResourceActionDepend[]
+  ResourceActionPermission ResourceActionPermission[]
+
+  @@unique([resourceId, action])
+  @@index([resourceId, action], name: "FK_RESOURCE_ID_ACTION_idx")
+}
+
+model ResourceActionPermission {
+  id               Int      @id @default(autoincrement())
+  resourceActionId Int
+  roleId           Int
+  isCreated        Boolean  @default(false)
+  isIncluded       Boolean  @default(false)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  ResourceAction ResourceAction @relation(fields: [resourceActionId], references: [id])
+  Role           RoleMaster     @relation(fields: [roleId], references: [id])
+
+  @@index([resourceActionId, roleId], name: "FK_RAP_RESOURCE_ID__ROLE_ID_idx")
+}
+
+model ResourceAttributeAction {
+  id                  Int      @id @default(autoincrement())
+  resourceAttributeId Int
+  action              Int
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  ResourceAttribute                 ResourceAttribute                   @relation(fields: [resourceAttributeId], references: [id])
+  ResourceAttributeActionPermission ResourceAttributeActionPermission[]
+  ResourceAttributeActionDepend     ResourceAttributeActionDepend[]
+
+  @@index([resourceAttributeId, action], name: "FK_RESOURCE_ATTRIBUTE_ID_ACTION_idx")
+}
+
+model ResourceAttributeActionPermission {
+  id                        Int      @id @default(autoincrement())
+  resourceAttributeActionId Int
+  roleId                    Int
+  isCreated                 Boolean  @default(false)
+  isIncluded                Boolean  @default(false)
+  createdAt                 DateTime @default(now())
+  updatedAt                 DateTime @updatedAt
+
+  ResourceAttributeAction ResourceAttributeAction @relation(fields: [resourceAttributeActionId], references: [id])
+  Role                    RoleMaster              @relation(fields: [roleId], references: [id])
+
+  @@index([resourceAttributeActionId, roleId], name: "FK_RAAP_RESOURCE_ID__ROLE_ID_idx")
+}
+
+model ResourceActionDepend {
+  id               Int      @id @default(autoincrement())
+  type             String
+  value            String
+  resourceActionId Int
+  isInternal       Boolean  @default(false)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  ResourceAction ResourceAction @relation(fields: [resourceActionId], references: [id])
+
+  // ResourceAction      ResourceAction     @relation(fields: [resourceActionId], references: [id])
+  // Resource            Resource?          @relation(fields: [resourceId], references: [id])
+  // resourceId          Int?
+  // ResourceAttribute   ResourceAttribute? @relation(fields: [resourceAttributeId], references: [id])
+  // resourceAttributeId Int?
+
+  @@unique([type, value, resourceActionId])
+}
+
+model ResourceAttributeActionDepend {
+  id                       Int      @id @default(autoincrement())
+  type                     String
+  value                    String
+  resourceAttibuteActionId Int
+  isInternal               Boolean  @default(false)
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
+
+  ResourceAttributeAction ResourceAttributeAction @relation(fields: [resourceAttibuteActionId], references: [id])
+  // Resource                Resource?               @relation(fields: [resourceId], references: [id])
+  // resourceId              Int?
+  // ResourceAttribute       ResourceAttribute?      @relation(fields: [resourceAttributeId], references: [id])
+  // resourceAttributeId     Int?
+
+  @@unique([type, value, resourceAttibuteActionId])
+}
