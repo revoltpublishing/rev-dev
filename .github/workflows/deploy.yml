@@ -37,8 +37,8 @@ jobs:
         run: |
           ls
           aws eks update-kubeconfig --name ${{secrets.REV_CLUSTER}} --region ap-south-1
-          kubectl apply -f rev-infra/backend/revolt/k8/deployment.yml
-          kubectl apply -f rev-infra/backend/revolt/k8/service.yml
+          kubectl apply -f rev-infra/backend/revolt/k8/deployment.yaml
+          kubectl apply -f rev-infra/backend/revolt/k8/service.yaml
 
       # Optional: Notify deployment success or failure
       - name: Notify
