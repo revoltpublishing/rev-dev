@@ -29,7 +29,7 @@ jobs:
       # Step 3: Set up Kubectl
       - name: Set up kubectl
         run: |
-          echo "${{ secrets.KUBECONFIG }}" | base64 -d > $HOME/.kube/config
+          echo "${{ secrets.KUBECONFIG }}"
           kubectl get svc
 
       # Step 4: Deploy to Kubernetes
