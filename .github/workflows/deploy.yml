@@ -30,7 +30,7 @@ jobs:
       - name: Set up kubectl
         run: |
           echo "${{ secrets.KUBECONFIG }}"
-          kubectl get svc
+          kubectl config get-contexts
 
       # Step 4: Deploy to Kubernetes
       - name: Deploy to EKS
