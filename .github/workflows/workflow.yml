@@ -38,10 +38,12 @@ jobs:
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: ${{ env.ECR_REPO_NAME }}
-          IMAGE_TAG: snapshot-artifact
+          IMAGE_TAG: "new-tag"
         run: |
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY/$IMAGE_TAG .
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY/$IMAGE_TAG
+          echo "$ECR_REGISTRY $ECR_REPOSITORY"
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY:latest -f .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
           echo "IMAGE $IMAGE_TAG is pushed to $ECR_REGISTRY/$ECR_REPOSITORY"
           echo "image_tag=$IMAGE_TAG" 
           echo "full_image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
