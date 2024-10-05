@@ -37,7 +37,7 @@ jobs:
         shell: bash
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: ${{ env.ECR_REPO_NAME }}
+          ECR_REPOSITORY: ${{ secrets.ECR_REPO_NAME }}
           IMAGE_TAG: "new-tag"
         run: |
           echo $ECR_REGISTRY
