@@ -44,7 +44,6 @@ jobs:
           echo $ECR_REPOSITORY
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
           echo "IMAGE $IMAGE_TAG is pushed to $ECR_REGISTRY/$ECR_REPOSITORY"
           echo "image_tag=$IMAGE_TAG" 
           echo "full_image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
