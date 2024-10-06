@@ -57,7 +57,7 @@ jobs:
       - name: Deploy to EKS
         run: |
           ls
-          aws eks update-kubeconfig --name ${{secrets.REV_CLUSTER}} --region ap-south-1
+          aws eks update-kubeconfig --name revolt-publishing-cluster --region ap-south-1
           kubectl apply -f rev-infra/backend/revolt/k8/deployment.yaml
           kubectl apply -f rev-infra/backend/revolt/k8/service.yaml
 
