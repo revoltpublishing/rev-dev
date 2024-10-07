@@ -58,9 +58,7 @@ jobs:
         run: |
           ls
           aws eks update-kubeconfig --name revolt-publishing-cluster --region ap-south-1
-          kubectl apply -f rev-infra/backend/revolt/k8/deployment.yaml
-          kubectl apply -f rev-infra/backend/revolt/k8/service.yaml
-
+          helm install rev-infra/backend/revolt/helm
       # Optional: Notify deployment success or failure
       - name: Notify
         if: success()
