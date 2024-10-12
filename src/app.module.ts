@@ -45,6 +45,10 @@ export class AppModule implements NestModule {
           path: "users/login",
           method: RequestMethod.ALL,
         },
+        // {
+        //   path: "users",
+        //   method: RequestMethod.ALL,
+        // },
         {
           path: "users/login/:token",
           method: RequestMethod.ALL,
